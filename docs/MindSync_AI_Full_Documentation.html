@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindSync AI – Full Project Documentation</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    :root {
+      --primary: #1E88E5;
+      --primary-dark: #1565C0;
+      --secondary: #00ACC1;
+      --accent: #7C4DFF;
+      --bg: #FFFFFF;
+      --surface: #F5F7FA;
+      --text: #1A1A2E;
+      --text-secondary: #555770;
+      --border: #E0E4EC;
+      --success: #43A047;
+      --warning: #F57C00;
+      --error: #D84315;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text);
+      line-height: 1.7;
+      background: var(--bg);
+      font-size: 11pt;
+    }
+
+    /* ---- Cover Page ---- */
+    .cover-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #0D47A1 0%, #1565C0 30%, #1E88E5 60%, #00ACC1 100%);
+      color: white;
+      text-align: center;
+      padding: 60px 40px;
+      page-break-after: always;
+    }
+    .cover-page .logo-icon {
+      width: 120px; height: 120px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 30px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 56px;
+      margin-bottom: 40px;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+    .cover-page h1 {
+      font-size: 42pt;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+    }
+    .cover-page .subtitle {
+      font-size: 16pt;
+      font-weight: 300;
+      opacity: 0.9;
+      margin-bottom: 50px;
+    }
+    .cover-meta {
+      font-size: 11pt;
+      opacity: 0.8;
+      line-height: 2;
+    }
+    .cover-meta strong { font-weight: 600; }
+
+    /* ---- Table of Contents ---- */
+    .toc-page {
+      padding: 60px 80px;
+      page-break-after: always;
+    }
+    .toc-page h2 {
+      font-size: 24pt;
+      color: var(--primary);
+      margin-bottom: 30px;
+      padding-bottom: 12px;
+      border-bottom: 3px solid var(--primary);
+    }
+    .toc-list {
+      list-style: none;
+      counter-reset: toc-counter;
+    }
+    .toc-list li {
+      counter-increment: toc-counter;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: baseline;
+    }
+    .toc-list li::before {
+      content: counter(toc-counter) ".";
+      font-weight: 700;
+      color: var(--primary);
+      min-width: 35px;
+      font-size: 12pt;
+    }
+    .toc-list li a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 12pt;
+      font-weight: 500;
+    }
+    .toc-list li a:hover { color: var(--primary); }
+    .toc-list .toc-page-num {
+      margin-left: auto;
+      color: var(--text-secondary);
+      font-size: 10pt;
+    }
+
+    /* ---- Main Content ---- */
+    .content {
+      padding: 40px 80px;
+      max-width: 100%;
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 40px;
+      page-break-inside: avoid;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 3px solid var(--primary);
+      page-break-after: avoid;
+    }
+    .section-number {
+      background: var(--primary);
+      color: white;
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700;
+      font-size: 16pt;
+      flex-shrink: 0;
+    }
+    .section-header h2 {
+      font-size: 20pt;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    h3 {
+      font-size: 14pt;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin: 24px 0 12px 0;
+      page-break-after: avoid;
+    }
+    h4 {
+      font-size: 12pt;
+      font-weight: 600;
+      color: var(--text);
+      margin: 16px 0 8px 0;
+    }
+
+    p {
+      margin-bottom: 12px;
+      text-align: justify;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 10pt;
+      page-break-inside: avoid;
+    }
+    thead th {
+      background: var(--primary);
+      color: white;
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 10pt;
+    }
+    tbody td {
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tbody tr:nth-child(even) { background: var(--surface); }
+    tbody tr:hover { background: #E3F2FD; }
+
+    /* Code Blocks */
+    pre {
+      background: #1E1E2E;
+      color: #CDD6F4;
+      padding: 16px 20px;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: 9.5pt;
+      line-height: 1.6;
+      margin: 12px 0;
+      page-break-inside: avoid;
+    }
+    code {
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      background: #EEF2F7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 9.5pt;
+      color: #C62828;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    .keyword { color: #CBA6F7; }
+    .string { color: #A6E3A1; }
+    .comment { color: #6C7086; }
+    .type { color: #89B4FA; }
+
+    /* Info Boxes */
+    .info-box {
+      padding: 16px 20px;
+      border-radius: 10px;
+      margin: 16px 0;
+      border-left: 4px solid;
+      page-break-inside: avoid;
+    }
+    .info-box.blue { background: #E3F2FD; border-color: var(--primary); }
+    .info-box.green { background: #E8F5E9; border-color: var(--success); }
+    .info-box.orange { background: #FFF3E0; border-color: var(--warning); }
+    .info-box.red { background: #FFEBEE; border-color: var(--error); }
+    .info-box .box-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+      font-size: 11pt;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin: 8px 0 12px 24px;
+    }
+    li { margin-bottom: 4px; }
+
+    /* Diagram Placeholder */
+    .diagram-box {
+      background: var(--surface);
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      margin: 16px 0;
+      page-break-inside: avoid;
+    }
+    .diagram-box pre {
+      background: var(--surface);
+      color: var(--text);
+      text-align: left;
+      font-size: 9pt;
+      border: none;
+    }
+
+    /* Flow diagram boxes */
+    .flow-diagram {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      margin: 16px 0;
+      page-break-inside: avoid;
+    }
+    .flow-box {
+      background: var(--primary);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 9pt;
+      font-weight: 600;
+      text-align: center;
+    }
+    .flow-arrow {
+      font-size: 18pt;
+      color: var(--text-secondary);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin: 16px 0;
+    }
+    .stat-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .stat-card .stat-value {
+      font-size: 24pt;
+      font-weight: 800;
+      color: var(--primary);
+    }
+    .stat-card .stat-label {
+      font-size: 9pt;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* Page break */
+    .page-break { page-break-before: always; }
+
+    /* Print Styles */
+    @media print {
+      body { font-size: 10pt; }
+      .content { padding: 20px 40px; }
+      .toc-page { padding: 40px; }
+      .cover-page { min-height: auto; padding: 40px; }
+      pre { font-size: 8.5pt; }
+      table { font-size: 9pt; }
+      .stats-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    /* Footer */
+    .page-footer {
+      text-align: center;
+      padding: 30px;
+      color: var(--text-secondary);
+      font-size: 9pt;
+      border-top: 1px solid var(--border);
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ======================== COVER PAGE ======================== -->
+<div class="cover-page">
+  <div class="logo-icon">🧠</div>
+  <h1>MindSync AI</h1>
+  <p class="subtitle">AI-Driven Mental Wellness Companion for IT Professionals</p>
+  <div class="cover-meta">
+    <strong>Module:</strong> CMP7003 – Emerging Mobile Applications<br>
+    <strong>Project Type:</strong> Full-Stack Mobile Application with ML &amp; AI Integration<br>
+    <strong>Platform:</strong> Android (Flutter) + FastAPI Backend + Firebase Cloud<br>
+    <strong>Version:</strong> 1.0.0<br>
+    <strong>Date:</strong> July 2026
+  </div>
+</div>
+
+<!-- ======================== TABLE OF CONTENTS ======================== -->
+<div class="toc-page">
+  <h2>Table of Contents</h2>
+  <ol class="toc-list">
+    <li><a href="#sec1">Executive Summary &amp; Project Overview</a></li>
+    <li><a href="#sec2">System Requirements Specification</a></li>
+    <li><a href="#sec3">Technology Stack</a></li>
+    <li><a href="#sec4">System Architecture</a></li>
+    <li><a href="#sec5">Flutter Frontend Architecture (Clean Architecture)</a></li>
+    <li><a href="#sec6">FastAPI Backend Architecture</a></li>
+    <li><a href="#sec7">Database Design (Cloud Firestore &amp; Hive)</a></li>
+    <li><a href="#sec8">REST API Design &amp; Specifications</a></li>
+    <li><a href="#sec9">Machine Learning Pipeline – Burnout Prediction</a></li>
+    <li><a href="#sec10">AI Architecture – Gemini Conversational Coach</a></li>
+    <li><a href="#sec11">Context-Aware Recommendation Engine</a></li>
+    <li><a href="#sec12">Smart Notification System</a></li>
+    <li><a href="#sec13">Product Design &amp; UI/UX Specifications</a></li>
+    <li><a href="#sec14">Application Features &amp; Screen Specifications</a></li>
+    <li><a href="#sec15">Security Architecture &amp; Audit</a></li>
+    <li><a href="#sec16">Quality Assurance &amp; Testing</a></li>
+    <li><a href="#sec17">Performance, Caching &amp; Offline Sync</a></li>
+    <li><a href="#sec18">Cloud Deployment &amp; DevOps</a></li>
+    <li><a href="#sec19">Project Directory Structure</a></li>
+    <li><a href="#sec20">Development Roadmap &amp; Modules</a></li>
+    <li><a href="#sec21">Risk Analysis &amp; Mitigation</a></li>
+    <li><a href="#sec22">Future Enhancements &amp; Scalability</a></li>
+  </ol>
+</div>
+
+<!-- ======================== MAIN CONTENT ======================== -->
+<div class="content">
+
+<!-- ======== SECTION 1 ======== -->
+<div class="section" id="sec1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <h2>Executive Summary &amp; Project Overview</h2>
+  </div>
+
+  <p><strong>MindSync AI</strong> is a production-grade wellness application designed specifically for software engineers and IT professionals. It leverages state-of-the-art <strong>Random Forest machine learning models</strong> and <strong>Google Gemini LLM orchestration</strong> to predict developer burnout risks, supply context-aware habit suggestions, track moods, support AI chat coaching, and compile visual telemetry dashboards.</p>
+
+  <div class="info-box blue">
+    <div class="box-title">🎯 Problem Statement</div>
+    IT professionals face uniquely high rates of burnout, stress, and sedentary lifestyles. MindSync AI addresses this by combining mood tracking, predictive ML analytics, and empathetic AI coaching into a single mobile companion.
+  </div>
+
+  <h3>Key Capabilities</h3>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">🧠</div>
+      <div class="stat-label">AI-Powered Burnout<br>Prediction (ML)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">💬</div>
+      <div class="stat-label">Gemini AI<br>Wellness Coach</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">📊</div>
+      <div class="stat-label">Visual Analytics<br>&amp; Reports</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">🔔</div>
+      <div class="stat-label">Smart Context-Aware<br>Notifications</div>
+    </div>
+  </div>
+
+  <h3>Target Users</h3>
+  <p>MindSync AI is designed for IT professionals including Software Engineers, Data Scientists, DevOps Engineers, QA Engineers, System Administrators, UI/UX Designers, and university students in computing disciplines.</p>
+
+  <h3>Core UX Goals</h3>
+  <ul>
+    <li><strong>Low Friction Logs:</strong> Allow users to log mood, sleep, water, and exercise in under 15 seconds</li>
+    <li><strong>Actionable Insights:</strong> Explain wellness trends and burnout risks clearly, without complex jargon</li>
+    <li><strong>Empathetic Tone:</strong> Keep copy warm and supportive, especially when displaying high burnout risks</li>
+    <li><strong>Consistent Experience:</strong> Smooth navigation and readable layouts in both light and dark modes</li>
+  </ul>
+</div>
+
+<!-- ======== SECTION 2 ======== -->
+<div class="section page-break" id="sec2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <h2>System Requirements Specification</h2>
+  </div>
+
+  <h3>2.1 Functional Requirements</h3>
+
+  <h4>A. User Management &amp; Authentication</h4>
+  <table>
+    <thead><tr><th>ID</th><th>Requirement</th></tr></thead>
+    <tbody>
+      <tr><td>FR-1.1</td><td>Users must be able to register an account using Email and Password</td></tr>
+      <tr><td>FR-1.2</td><td>System must validate credentials and prompt verified email login flows</td></tr>
+      <tr><td>FR-1.3</td><td>Users must be able to reset forgotten passwords securely</td></tr>
+      <tr><td>FR-1.4</td><td>Users must be able to update profile data (fullName, age, gender, occupation)</td></tr>
+    </tbody>
+  </table>
+
+  <h4>B. Mood &amp; Wellness Logger</h4>
+  <table>
+    <thead><tr><th>ID</th><th>Requirement</th></tr></thead>
+    <tbody>
+      <tr><td>FR-2.1</td><td>Users must be able to create one mood log entry per calendar day</td></tr>
+      <tr><td>FR-2.2</td><td>Logger must collect mood classification, stress/energy level metrics (1–10), and optional journal descriptions</td></tr>
+      <tr><td>FR-2.3</td><td>Users must be able to view, edit, or delete historical journal entries</td></tr>
+    </tbody>
+  </table>
+
+  <h4>C. Predictive Burnout ML Service</h4>
+  <table>
+    <thead><tr><th>ID</th><th>Requirement</th></tr></thead>
+    <tbody>
+      <tr><td>FR-3.1</td><td>System must process metrics (sleep, stress, activity, water, work hours) and predict burnout risk (Low, Medium, High)</td></tr>
+      <tr><td>FR-3.2</td><td>System must isolate key contributing factors using SHAP values</td></tr>
+      <tr><td>FR-3.3</td><td>Prediction updates must run automatically upon mood log submission</td></tr>
+    </tbody>
+  </table>
+
+  <h4>D. Gemini AI Conversational Assistant</h4>
+  <table>
+    <thead><tr><th>ID</th><th>Requirement</th></tr></thead>
+    <tbody>
+      <tr><td>FR-4.1</td><td>Users must be able to ask wellness queries and receive fast AI answers</td></tr>
+      <tr><td>FR-4.2</td><td>Assistant must load user history (mood, sleep quality) as context for recommendations</td></tr>
+      <tr><td>FR-4.3</td><td>System must enforce medical disclaimers and route crisis flags safely</td></tr>
+    </tbody>
+  </table>
+
+  <h4>E. Smart Habits Recommendation Engine</h4>
+  <table>
+    <thead><tr><th>ID</th><th>Requirement</th></tr></thead>
+    <tbody>
+      <tr><td>FR-5.1</td><td>Engine must generate context-aware suggestions based on time, weather, activity, and prediction status</td></tr>
+      <tr><td>FR-5.2</td><td>Users must be able to give feedback (like/dislike) on suggestions</td></tr>
+    </tbody>
+  </table>
+
+  <h4>F. Reports &amp; Analytics</h4>
+  <table>
+    <thead><tr><th>ID</th><th>Requirement</th></tr></thead>
+    <tbody>
+      <tr><td>FR-6.1</td><td>System must display daily summaries, weekly reports, and monthly trend graphs</td></tr>
+      <tr><td>FR-6.2</td><td>System must provide export options (PDF, CSV)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.2 Non-Functional Requirements</h3>
+  <table>
+    <thead><tr><th>ID</th><th>Category</th><th>Requirement</th></tr></thead>
+    <tbody>
+      <tr><td>NFR-1.1</td><td>Security</td><td>All API communications must enforce HTTPS with SSL/TLS protocols</td></tr>
+      <tr><td>NFR-1.2</td><td>Security</td><td>Firestore rules must restrict reads/writes strictly to verified document owners</td></tr>
+      <tr><td>NFR-1.3</td><td>Security</td><td>API keys must reside in environment variables and never be committed to git</td></tr>
+      <tr><td>NFR-2.1</td><td>Performance</td><td>ML inference must resolve in under 100 milliseconds</td></tr>
+      <tr><td>NFR-2.2</td><td>Performance</td><td>Offline mode must support local mood entry queues with auto-sync</td></tr>
+      <tr><td>NFR-2.3</td><td>Performance</td><td>Background sensors must use efficient sleeping threads to prevent battery drain</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ======== SECTION 3 ======== -->
+<div class="section page-break" id="sec3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <h2>Technology Stack</h2>
+  </div>
+
+  <h3>3.1 Frontend (Flutter Mobile Application)</h3>
+  <table>
+    <thead><tr><th>Technology</th><th>Purpose</th><th>Version</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Flutter SDK</strong></td><td>Cross-platform UI development framework</td><td>^3.22.0 (Stable)</td></tr>
+      <tr><td><strong>Dart</strong></td><td>Programming language for Flutter</td><td>^3.4.0</td></tr>
+      <tr><td><strong>Material 3</strong></td><td>Google's latest design system standard</td><td>Included in SDK</td></tr>
+      <tr><td><strong>Riverpod</strong></td><td>Compile-safe state management &amp; DI</td><td>flutter_riverpod: ^2.5.1</td></tr>
+      <tr><td><strong>GoRouter</strong></td><td>Declarative routing package for navigation</td><td>go_router: ^14.2.0</td></tr>
+      <tr><td><strong>Dio</strong></td><td>Robust HTTP client for API communication</td><td>dio: ^5.4.3</td></tr>
+      <tr><td><strong>Hive</strong></td><td>Lightweight NoSQL local database</td><td>hive_flutter: ^1.1.0</td></tr>
+      <tr><td><strong>fl_chart</strong></td><td>Dynamic, interactive charts</td><td>fl_chart: ^0.68.0</td></tr>
+      <tr><td><strong>Google Fonts</strong></td><td>Custom typography (Inter typeface)</td><td>google_fonts: ^6.2.1</td></tr>
+      <tr><td><strong>Lottie</strong></td><td>Interactive animations</td><td>lottie: ^3.1.2</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.2 Backend API Service (FastAPI)</h3>
+  <table>
+    <thead><tr><th>Technology</th><th>Purpose</th><th>Version</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Python</strong></td><td>High-level language for AI/ML and API services</td><td>^3.11</td></tr>
+      <tr><td><strong>FastAPI</strong></td><td>High-performance modern web framework</td><td>^0.111.0</td></tr>
+      <tr><td><strong>Uvicorn</strong></td><td>ASGI server implementation</td><td>^0.30.0</td></tr>
+      <tr><td><strong>Pydantic v2</strong></td><td>Data validation and settings management</td><td>^2.7.0</td></tr>
+      <tr><td><strong>Firebase Admin SDK</strong></td><td>Auth token verification and DB operations</td><td>firebase-admin: ^6.5.0</td></tr>
+      <tr><td><strong>HTTPX</strong></td><td>Async HTTP client for external APIs</td><td>^0.27.0</td></tr>
+      <tr><td><strong>Loguru</strong></td><td>Structured and elegant logging</td><td>^0.7.2</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.3 Database &amp; Cloud Infrastructure</h3>
+  <table>
+    <thead><tr><th>Service</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Firebase Authentication</strong></td><td>Secure user management (Email/Password)</td></tr>
+      <tr><td><strong>Cloud Firestore</strong></td><td>NoSQL cloud database for all collections</td></tr>
+      <tr><td><strong>Firebase Storage</strong></td><td>Profile pictures and PDF report hosting</td></tr>
+      <tr><td><strong>Firebase Cloud Messaging</strong></td><td>Push notification routing</td></tr>
+      <tr><td><strong>Hive DB (Local)</strong></td><td>Offline caching, sync queues, theme preferences</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.4 AI &amp; Machine Learning</h3>
+  <table>
+    <thead><tr><th>Technology</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Google Gemini API (v1.5 Flash)</strong></td><td>Conversational wellness coaching &amp; context-aware suggestions</td></tr>
+      <tr><td><strong>Scikit-Learn</strong></td><td>ML library for burnout prediction algorithms</td></tr>
+      <tr><td><strong>Random Forest Classifier</strong></td><td>Selected model for burnout risk prediction</td></tr>
+      <tr><td><strong>SHAP</strong></td><td>Explainable AI – feature importance reporting</td></tr>
+      <tr><td><strong>Pandas &amp; NumPy</strong></td><td>Data processing and statistical analysis</td></tr>
+      <tr><td><strong>Joblib</strong></td><td>Model serialization for inference</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.5 Device Features &amp; Hardware Access</h3>
+  <table>
+    <thead><tr><th>Sensor/API</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Geolocator (GPS)</strong></td><td>Location for weather-based recommendations</td></tr>
+      <tr><td><strong>Pedometer &amp; Accelerometer</strong></td><td>Step counting and activity tracking</td></tr>
+      <tr><td><strong>Connectivity Plus</strong></td><td>Network status monitoring for offline queues</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ======== SECTION 4 ======== -->
+<div class="section page-break" id="sec4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <h2>System Architecture</h2>
+  </div>
+
+  <p>The MindSync AI ecosystem is designed as a distributed, highly available, secure, and offline-first mobile-cloud system consisting of four tiers:</p>
+
+  <h3>4.1 High-Level Architecture Diagram</h3>
+  <div class="diagram-box">
+<pre>
+┌─────────────────────────────────────────────────────────────────────┐
+│                        CLIENT TIER                                  │
+│  ┌──────────────────────┐    ┌──────────────────────┐              │
+│  │  Flutter Mobile App  │◄──►│  Local Hive DB       │              │
+│  │  (Android / iOS)     │    │  (Offline Cache)     │              │
+│  └──────────┬───────────┘    └──────────────────────┘              │
+└─────────────┼───────────────────────────────────────────────────────┘
+              │ HTTPS (Bearer Token)
+┌─────────────▼───────────────────────────────────────────────────────┐
+│                   SECURITY &amp; AUTH TIER (Firebase)                    │
+│  ┌────────────┐  ┌────────────┐  ┌──────────┐  ┌───────────────┐  │
+│  │ Firebase   │  │ Cloud      │  │ Firebase │  │ Firebase      │  │
+│  │ Auth       │  │ Firestore  │  │ Storage  │  │ Cloud Msg     │  │
+│  └────────────┘  └────────────┘  └──────────┘  └───────────────┘  │
+└─────────────────────────────┬───────────────────────────────────────┘
+                              │
+┌─────────────────────────────▼───────────────────────────────────────┐
+│                     APP SERVER TIER                                  │
+│  ┌──────────────────┐  ┌────────────────┐  ┌───────────────────┐   │
+│  │ FastAPI REST API  │  │ Scikit-learn   │  │ AI Orchestration │   │
+│  │ Service           │  │ Prediction     │  │ Service          │   │
+│  │                   │  │ Engine         │  │ (Gemini API)     │   │
+│  └──────────────────┘  └────────────────┘  └───────────────────┘   │
+└─────────────────────────────┬───────────────────────────────────────┘
+                              │
+┌─────────────────────────────▼───────────────────────────────────────┐
+│                   EXTERNAL PROVIDERS                                 │
+│  ┌────────────────────────┐    ┌────────────────────────┐          │
+│  │ Google Gemini API      │    │ OpenWeather API        │          │
+│  │ (v1.5 Flash)           │    │ (Geographic Weather)   │          │
+│  └────────────────────────┘    └────────────────────────┘          │
+└─────────────────────────────────────────────────────────────────────┘
+</pre>
+  </div>
+
+  <h3>4.2 Communication &amp; Data Flows</h3>
+
+  <h4>A. Authentication Flow</h4>
+  <ol>
+    <li>User logs in via Email/Password in the Flutter App</li>
+    <li>Firebase Authentication registers the session, generating a short-lived JSON Web Token (ID Token)</li>
+    <li>Flutter stores the ID Token locally in a Hive encrypted box</li>
+    <li>For every backend query, a custom Dio interceptor inserts <code>Authorization: Bearer &lt;ID_Token&gt;</code></li>
+    <li>FastAPI verifies the token against Google's public JWKS certificates, retrieving the verified user ID (<code>uid</code>)</li>
+  </ol>
+
+  <h4>B. Machine Learning Inference Flow</h4>
+  <ol>
+    <li>Flutter aggregates the user's latest 7-day health metrics and fires a <code>POST</code> to <code>/api/predict/burnout</code></li>
+    <li>FastAPI validates parameters via Pydantic schemas</li>
+    <li>Random Forest model computes prediction score, risk category, and class confidence</li>
+    <li>SHAP value matrices isolate the top three contributing factors</li>
+    <li>Results are logged to Firestore and returned to the client</li>
+  </ol>
+
+  <h4>C. AI Conversational Flow</h4>
+  <ol>
+    <li>User types a query in the chat console</li>
+    <li>Flutter sends message + session ID to FastAPI <code>/api/chat/message</code></li>
+    <li>FastAPI retrieves user profile, mood logs, sleep metrics, and conversational memory</li>
+    <li>Backend constructs a structured prompt and submits to Gemini API (<code>gemini-1.5-flash</code>)</li>
+    <li>Gemini generates a tailored wellness suggestion, which is parsed, logged, and returned</li>
+  </ol>
+</div>
+
+<!-- ======== SECTION 5 ======== -->
+<div class="section page-break" id="sec5">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <h2>Flutter Frontend Architecture (Clean Architecture)</h2>
+  </div>
+
+  <p>The mobile application implements a <strong>feature-based Clean Architecture</strong> structure to isolate UI, business logic, and data layers.</p>
+
+  <div class="diagram-box">
+<pre>
+┌──────────────────────────────────────────────────────────────────┐
+│                    PRESENTATION LAYER (UI)                        │
+│  ┌────────────┐    ┌──────────────────┐    ┌─────────────────┐  │
+│  │ UI Pages   │───►│ Reusable Widgets │    │ Riverpod State  │  │
+│  │ (Screens)  │    │ (Components)     │    │ Controllers     │  │
+│  └────────────┘    └──────────────────┘    └────────┬────────┘  │
+└─────────────────────────────────────────────────────┼────────────┘
+                                                      │
+┌─────────────────────────────────────────────────────▼────────────┐
+│                       DOMAIN LAYER (Logic)                        │
+│  ┌──────────────┐    ┌────────────────┐    ┌─────────────────┐  │
+│  │ Use Cases    │    │ Business       │    │ Repository      │  │
+│  │              │    │ Entities       │    │ Interfaces      │  │
+│  └──────────────┘    └────────────────┘    └────────┬────────┘  │
+└─────────────────────────────────────────────────────┼────────────┘
+                                                      │
+┌─────────────────────────────────────────────────────▼────────────┐
+│                     DATA LAYER (Persistence)                      │
+│  ┌────────────────┐   ┌────────────────┐   ┌─────────────────┐  │
+│  │ Repository     │   │ Remote / Local │   │ Data Models     │  │
+│  │ Implementations│   │ Data Sources   │   │ (JSON Helpers)  │  │
+│  └────────────────┘   └────────────────┘   └─────────────────┘  │
+└──────────────────────────────────────────────────────────────────┘
+</pre>
+  </div>
+
+  <h3>Layer Responsibilities</h3>
+  <ul>
+    <li><strong>Presentation Layer:</strong> Renders UI and handles user interaction. Widgets react to Riverpod Provider state changes. Providers call Domain Use Cases.</li>
+    <li><strong>Domain Layer:</strong> Independent core with clean Entities, Use Cases, and abstract Repository Interfaces. Zero dependencies on frameworks.</li>
+    <li><strong>Data Layer:</strong> Implements repository contracts, maps network payloads to models, decides between Hive (local) and API endpoints (remote).</li>
+    <li><strong>Core Layer:</strong> Shared configurations – themes, routing, constants, validation, and failure types.</li>
+    <li><strong>Dependency Injection:</strong> Managed declaratively using Riverpod, maintaining singletons where needed.</li>
+  </ul>
+
+  <h3>Feature Modules</h3>
+  <table>
+    <thead><tr><th>Feature</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Authentication</strong></td><td>Login, Register, Forgot Password, Splash, Onboarding</td></tr>
+      <tr><td><strong>Dashboard</strong></td><td>Wellness score, weather, burnout risk, telemetry, quick actions</td></tr>
+      <tr><td><strong>Mood</strong></td><td>Mood logging, stress/energy sliders, journal, tags, calendar history</td></tr>
+      <tr><td><strong>Chat</strong></td><td>Gemini AI wellness coaching interface with conversation memory</td></tr>
+      <tr><td><strong>Reports</strong></td><td>Analytics charts, trend graphs, AI summaries, PDF/CSV export</td></tr>
+      <tr><td><strong>Recommendations</strong></td><td>Context-aware habit suggestions with feedback</td></tr>
+      <tr><td><strong>Burnout</strong></td><td>ML prediction display with SHAP feature importance</td></tr>
+      <tr><td><strong>Notifications</strong></td><td>Smart alerts center with priority categorization</td></tr>
+      <tr><td><strong>Profile</strong></td><td>User details, avatar, stats, edit capabilities</td></tr>
+      <tr><td><strong>Settings</strong></td><td>Dark mode, notification toggles, data export/delete</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ======== SECTION 6 ======== -->
+<div class="section page-break" id="sec6">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <h2>FastAPI Backend Architecture</h2>
+  </div>
+
+  <p>The FastAPI backend uses a decoupled, layered approach with clear separation between routing, business logic, and data access.</p>
+
+  <div class="diagram-box">
+<pre>
+backend/
+├── app/
+│   ├── api/
+│   │   ├── routers/              # Routes: Auth, Mood, Prediction, Chat
+│   │   └── dependencies/         # Request extractors, auth, rate-limiters
+│   ├── core/
+│   │   ├── config.py             # Base settings (Pydantic Settings)
+│   │   ├── security.py           # Firebase verification, token validation
+│   │   └── exceptions.py         # Global exception handlers
+│   ├── firebase/
+│   │   ├── admin_sdk.py          # App credentials initializer
+│   │   └── firestore_repo.py     # Generic collection CRUD wrappers
+│   ├── ml/
+│   │   ├── train.py              # Data preparation and ML model training
+│   │   └── models/               # Serialized model files (Joblib)
+│   ├── models/                   # Domain-level backend dataclasses
+│   ├── schemas/                  # Pydantic schemas for input validation
+│   ├── services/
+│   │   ├── ai_service.py         # System prompts, Gemini API integration
+│   │   ├── ml_service.py         # Prediction preparation &amp; execution
+│   │   └── weather_service.py    # OpenWeather API HTTP client
+│   └── main.py                   # API registration, middlewares, logging
+├── tests/                        # Pytest automated testing suites
+├── Dockerfile                    # Container configuration
+├── docker-compose.yml            # Multi-service orchestration
+└── requirements.txt              # Python dependencies
+</pre>
+  </div>
+
+  <h3>Middleware Stack</h3>
+  <ul>
+    <li><strong>Rate Limiter:</strong> Sliding window – 100 calls/minute/user</li>
+    <li><strong>Request Logger:</strong> Structured logging via Loguru with PII masking</li>
+    <li><strong>Security Headers:</strong> HSTS, Content Security Policy, X-Frame-Options</li>
+    <li><strong>CORS:</strong> Origin-restricted based on environment configuration</li>
+  </ul>
+</div>
+
+<!-- ======== SECTION 7 ======== -->
+<div class="section page-break" id="sec7">
+  <div class="section-header">
+    <div class="section-number">7</div>
+    <h2>Database Design (Cloud Firestore &amp; Hive)</h2>
+  </div>
+
+  <h3>7.1 Firestore Collection Map</h3>
+  <div class="diagram-box">
+<pre>
+Firestore Root
+│
+├── users/                    → {userId} Document
+├── mood_logs/                → {logId} Document
+├── activity_logs/            → {logId} Document
+├── chat_sessions/            → {sessionId} Document
+│   └── messages/                 → {messageId} Sub-document
+├── recommendations/          → {recId} Document
+├── burnout_predictions/      → {predId} Document
+├── notifications/            → {notifId} Document
+└── notification_preferences/ → {userId} Document
+</pre>
+  </div>
+
+  <h3>7.2 Collection Schemas</h3>
+
+  <h4>Users Collection</h4>
+  <table>
+    <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>uid</code></td><td>String</td><td>Unique ID (matches Firebase Auth UID)</td></tr>
+      <tr><td><code>fullName</code></td><td>String</td><td>User's full name</td></tr>
+      <tr><td><code>email</code></td><td>String</td><td>Account email address</td></tr>
+      <tr><td><code>occupation</code></td><td>String</td><td>Job title</td></tr>
+      <tr><td><code>age</code></td><td>Number</td><td>User's age (18–100)</td></tr>
+      <tr><td><code>gender</code></td><td>String</td><td>Gender identifier</td></tr>
+      <tr><td><code>profileImage</code></td><td>String (URL)</td><td>Cloud Storage avatar link</td></tr>
+      <tr><td><code>notificationPreferences</code></td><td>Map</td><td>Hydration, break, sleep, walk toggles</td></tr>
+      <tr><td><code>createdAt</code></td><td>Timestamp</td><td>Account creation datetime</td></tr>
+    </tbody>
+  </table>
+
+  <h4>Mood Logs Collection</h4>
+  <table>
+    <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>String</td><td>Unique entry log ID</td></tr>
+      <tr><td><code>userId</code></td><td>String</td><td>Associated User's UID</td></tr>
+      <tr><td><code>mood</code></td><td>String</td><td>Mood tag (Very Happy, Happy, Neutral, Sad, Anxious, Exhausted, Angry)</td></tr>
+      <tr><td><code>moodScore</code></td><td>Number</td><td>Numeric assessment 1–10</td></tr>
+      <tr><td><code>stressLevel</code></td><td>Number</td><td>Stress metric 1–10</td></tr>
+      <tr><td><code>energyLevel</code></td><td>Number</td><td>Energy level 1–10</td></tr>
+      <tr><td><code>journal</code></td><td>String</td><td>Journal entry notes</td></tr>
+      <tr><td><code>tags</code></td><td>Array</td><td>Contextual tags (work, deadline, etc.)</td></tr>
+      <tr><td><code>createdAt</code></td><td>Timestamp</td><td>Entry creation timestamp</td></tr>
+    </tbody>
+  </table>
+
+  <h4>Burnout Predictions Collection</h4>
+  <table>
+    <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>String</td><td>Prediction document ID</td></tr>
+      <tr><td><code>userId</code></td><td>String</td><td>Associated User's UID</td></tr>
+      <tr><td><code>burnoutRisk</code></td><td>String</td><td>Low, Medium, or High</td></tr>
+      <tr><td><code>confidence</code></td><td>Number</td><td>Prediction probability (0.0–1.0)</td></tr>
+      <tr><td><code>riskScore</code></td><td>Number</td><td>Numeric assessment 0–100</td></tr>
+      <tr><td><code>importantFactors</code></td><td>Array</td><td>Top contributing features</td></tr>
+      <tr><td><code>createdAt</code></td><td>Timestamp</td><td>Execution timestamp</td></tr>
+    </tbody>
+  </table>
+
+  <h3>7.3 Local Hive Database (Offline Storage)</h3>
+  <table>
+    <thead><tr><th>Box Name</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>auth_box</code></td><td>JWT tokens, refresh tokens, user profile data for persistent login</td></tr>
+      <tr><td><code>settings_box</code></td><td>Dark/Light mode, notification settings, language preference</td></tr>
+      <tr><td><code>mood_sync_queue</code></td><td>Unsynced offline mood entries for background sync</td></tr>
+      <tr><td><code>cached_data_box</code></td><td>Last dashboard JSON, weather forecasts for offline opening</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ======== SECTION 8 ======== -->
+<div class="section page-break" id="sec8">
+  <div class="section-header">
+    <div class="section-number">8</div>
+    <h2>REST API Design &amp; Specifications</h2>
+  </div>
+
+  <p>All endpoints (except health check) require <code>Authorization: Bearer &lt;Firebase_ID_Token&gt;</code>. Rate limited at 100 calls/minute/user.</p>
+
+  <h3>8.1 Endpoint Catalog</h3>
+  <table>
+    <thead><tr><th>Method</th><th>Endpoint</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>GET</code></td><td>/health</td><td>Liveness and readiness check</td></tr>
+      <tr><td><code>POST</code></td><td>/api/auth/verify</td><td>Verify Firebase ID Token</td></tr>
+      <tr><td><code>POST</code></td><td>/api/users/profile</td><td>Create or update user profile</td></tr>
+      <tr><td><code>POST</code></td><td>/api/mood/log</td><td>Log a new mood journal entry</td></tr>
+      <tr><td><code>GET</code></td><td>/api/mood/history</td><td>Retrieve historical mood logs</td></tr>
+      <tr><td><code>POST</code></td><td>/api/predict/burnout</td><td>Run ML burnout prediction</td></tr>
+      <tr><td><code>GET</code></td><td>/api/prediction/latest</td><td>Get latest prediction</td></tr>
+      <tr><td><code>POST</code></td><td>/api/chat/message</td><td>Submit message to AI coach</td></tr>
+      <tr><td><code>GET</code></td><td>/api/recommendations</td><td>Get context-aware suggestions</td></tr>
+      <tr><td><code>GET</code></td><td>/api/notifications</td><td>List notifications</td></tr>
+      <tr><td><code>POST</code></td><td>/api/notifications/{id}/read</td><td>Mark notification as read</td></tr>
+      <tr><td><code>POST</code></td><td>/api/notifications/trigger-evaluation</td><td>Evaluate rule-based alerts</td></tr>
+    </tbody>
+  </table>
+
+  <h3>8.2 Sample: Burnout Prediction API</h3>
+  <h4>Request Body</h4>
+  <pre><code>{
+  "sleepHours": 5.5,
+  "workingHours": 10.0,
+  "moodScore": 3,
+  "stressLevel": 8,
+  "dailySteps": 2500,
+  "waterGlasses": 3,
+  "exerciseMinutes": 0
+}</code></pre>
+
+  <h4>Response (200 OK)</h4>
+  <pre><code>{
+  "success": true,
+  "data": {
+    "burnoutRisk": "High",
+    "confidence": 0.87,
+    "riskScore": 84.0,
+    "importantFactors": [
+      "Low sleep (5.5h)",
+      "Prolonged working hours (10.0h)",
+      "Inadequate daily activity (2500 steps)"
+    ],
+    "recommendations": [
+      "Take a 15-minute screen break immediately.",
+      "Increase water intake.",
+      "Target at least 7 hours of sleep tonight."
+    ]
+  }
+}</code></pre>
+
+  <h3>8.3 Standard Response Format</h3>
+  <pre><code>{
+  "success": true | false,
+  "message": "Operation description",
+  "data": { ... },
+  "timestamp": "2026-07-21T09:46:49Z"
+}</code></pre>
+
+  <h3>8.4 Error Code Conventions</h3>
+  <table>
+    <thead><tr><th>Code</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>400</code></td><td>Validation failure (out-of-bounds metrics)</td></tr>
+      <tr><td><code>401</code></td><td>Missing or malformed authentication token</td></tr>
+      <tr><td><code>403</code></td><td>Cross-user resource access attempt</td></tr>
+      <tr><td><code>429</code></td><td>Rate limit exceeded</td></tr>
+      <tr><td><code>500</code></td><td>Uncaught server exception</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ======== SECTION 9 ======== -->
+<div class="section page-break" id="sec9">
+  <div class="section-header">
+    <div class="section-number">9</div>
+    <h2>Machine Learning Pipeline – Burnout Prediction</h2>
+  </div>
+
+  <h3>9.1 Input Features</h3>
+  <table>
+    <thead><tr><th>Feature</th><th>Domain</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>sleep_hours</code></td><td>[0.0, 24.0]</td><td>Float</td><td>Hours of sleep tracked</td></tr>
+      <tr><td><code>working_hours</code></td><td>[0.0, 24.0]</td><td>Float</td><td>Working hours in 24h period</td></tr>
+      <tr><td><code>mood_score</code></td><td>[1, 10]</td><td>Integer</td><td>Logged mood score</td></tr>
+      <tr><td><code>stress_level</code></td><td>[1, 10]</td><td>Integer</td><td>Logged stress level</td></tr>
+      <tr><td><code>energy_level</code></td><td>[1, 10]</td><td>Integer</td><td>Logged energy level</td></tr>
+      <tr><td><code>water_intake</code></td><td>[0, 30]</td><td>Integer</td><td>Water glasses tracked</td></tr>
+      <tr><td><code>daily_steps</code></td><td>[0, 100000]</td><td>Integer</td><td>Pedometer step count</td></tr>
+      <tr><td><code>exercise_minutes</code></td><td>[0, 1440]</td><td>Integer</td><td>Total active minutes</td></tr>
+    </tbody>
+  </table>
+
+  <h3>9.2 Pipeline Execution Flow</h3>
+  <div class="flow-diagram">
+    <div class="flow-box">Synthetic Dataset<br>(10,000 records)</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Clean, Scale<br>&amp; Encode</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Train/Test<br>Split (80/20)</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Model Comparison<br>(RF, LR, DT)</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">GridSearchCV<br>Tuning</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">SHAP<br>Explainability</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Joblib Model<br>Export</div>
+  </div>
+
+  <h3>9.3 Data Preparation</h3>
+  <ul>
+    <li><strong>Imputation:</strong> Missing values default to historical user averages</li>
+    <li><strong>Outlier Clamping:</strong> Values outside standard distributions are clamped (e.g., sleep > 18h, steps > 40k)</li>
+    <li><strong>Target Encoding:</strong> 0 → Low Risk, 1 → Medium Risk, 2 → High Risk</li>
+    <li><strong>Scaling:</strong> Robust scaling on steps and exercise minutes to avoid variance bias</li>
+  </ul>
+
+  <h3>9.4 Model Training &amp; Comparison</h3>
+  <table>
+    <thead><tr><th>Algorithm</th><th>Type</th><th>Selection Status</th></tr></thead>
+    <tbody>
+      <tr><td>Logistic Regression</td><td>Linear baseline model</td><td>Baseline comparator</td></tr>
+      <tr><td>Decision Tree</td><td>Non-linear, single tree</td><td>Overfitting prone</td></tr>
+      <tr><td><strong>Random Forest</strong></td><td>Ensemble (multiple trees)</td><td><strong>✅ Selected – Best accuracy &amp; generalization</strong></td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box green">
+    <div class="box-title">📊 Performance Targets</div>
+    Primary Metric: F1-score (macro-averaged) • Target Accuracy ≥ 85% • F1-score ≥ 0.80 • Cross-validation: cv=5
+  </div>
+
+  <h3>9.5 Explainable AI (SHAP)</h3>
+  <p>SHAP (SHapley Additive exPlanations) computes individual feature contributions. When the model flags High Risk, the backend extracts the top three SHAP values and returns them as <code>importantFactors</code> — e.g., <em>"Low sleep is contributing most to your risk score."</em></p>
+
+  <h3>9.6 Deployment</h3>
+  <ul>
+    <li>Model serialized to <code>backend/app/ml/models/burnout_model.pkl</code> via Joblib</li>
+    <li>FastAPI loads the model into memory during startup</li>
+    <li>Inference executes in under <strong>50 milliseconds</strong></li>
+  </ul>
+</div>
+
+<!-- ======== SECTION 10 ======== -->
+<div class="section page-break" id="sec10">
+  <div class="section-header">
+    <div class="section-number">10</div>
+    <h2>AI Architecture – Gemini Conversational Coach</h2>
+  </div>
+
+  <p>MindSync AI's conversational coaching is powered by <strong>Google Gemini v1.5 Flash</strong>, selected for low latency and high quality textual summaries.</p>
+
+  <h3>10.1 Processing Pipeline</h3>
+  <div class="flow-diagram">
+    <div class="flow-box">User Message<br>(POST)</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">AI Service<br>Wrapper</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Retrieve Context<br>(Profile + Mood + Sleep)</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Construct<br>System Prompt</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Assemble Chat<br>History (last 10)</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Invoke Gemini<br>v1.5 Flash</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Safety Filter<br>&amp; Return</div>
+  </div>
+
+  <h3>10.2 Prompt Engineering Strategy</h3>
+  <div class="info-box blue">
+    <div class="box-title">System Guidelines</div>
+    <em>"You are MindSync AI, an empathetic wellness coach for IT professionals. You suggest healthy boundaries, stress reduction habits, and digital breaks. You do not offer clinical diagnosis. Maintain answers under 150 words. Adopt a warm, professional tone."</em>
+  </div>
+
+  <p><strong>Context Ingestion:</strong> The prompt includes active profile variables — <em>"The user is a Software Engineer, aged 29. Their average stress level over the last 3 days was 8/10. Sleep averaged 5.5 hours."</em></p>
+
+  <h3>10.3 Conversation Memory</h3>
+  <p>FastAPI retains the last 10 message documents under the active sub-collection to prevent token bloat while maintaining context-aware responses.</p>
+
+  <h3>10.4 Safety Filters &amp; Key Security</h3>
+  <ul>
+    <li><strong>Content Restrictions:</strong> API safety configurations flag and reject queries relating to self-harm, hate speech, or clinical queries</li>
+    <li><strong>Prompt Injection Defense:</strong> Sanitization module filters blacklisted injection patterns (e.g., "ignore prior instructions", "system override"). Attacks return 400 Bad Request</li>
+    <li><strong>Medical Disclaimer:</strong> Every output appends: <em>"Disclaimer: MindSync is a wellness companion and does not replace medical advice."</em></li>
+  </ul>
+</div>
+
+<!-- ======== SECTION 11 ======== -->
+<div class="section page-break" id="sec11">
+  <div class="section-header">
+    <div class="section-number">11</div>
+    <h2>Context-Aware Recommendation Engine</h2>
+  </div>
+
+  <p>MindSync AI uses multi-source context inputs to deliver personalized, situation-aware recommendations.</p>
+
+  <h3>11.1 Decision Logic</h3>
+  <table>
+    <thead><tr><th>Condition</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td>Weather = Rainy AND Stress ≥ 7</td><td>Suggest indoor recommendations (desk stretches, muscle relaxation)</td></tr>
+      <tr><td>Weather = Clear AND Steps ≤ 3000 AND Time = 14:00</td><td>Suggest 15-minute outdoor walk</td></tr>
+      <tr><td>Time = Late evening AND Sleep &lt; 6h</td><td>Trigger wind-down notification</td></tr>
+      <tr><td>Burnout Risk = High</td><td>Prioritize stress-reduction, bypass intense activity targets</td></tr>
+    </tbody>
+  </table>
+
+  <h3>11.2 Context Inputs</h3>
+  <ul>
+    <li><strong>Time of Day:</strong> Adjusts suggestion categories (morning activity vs. evening wind-down)</li>
+    <li><strong>Weather Data:</strong> OpenWeather API drives indoor/outdoor suggestion routing</li>
+    <li><strong>Location:</strong> GPS for broad location attributes</li>
+    <li><strong>Burnout Risk Level:</strong> ML prediction re-ranks recommendation priority</li>
+    <li><strong>Mood History:</strong> Recent trends influence suggestion tone and type</li>
+  </ul>
+</div>
+
+<!-- ======== SECTION 12 ======== -->
+<div class="section page-break" id="sec12">
+  <div class="section-header">
+    <div class="section-number">12</div>
+    <h2>Smart Notification System</h2>
+  </div>
+
+  <p>Smart notification scheduling uses local notifications and FCM to nudge behavior patterns without triggering notification fatigue.</p>
+
+  <h3>12.1 Notification Categories</h3>
+  <table>
+    <thead><tr><th>Category</th><th>Trigger</th><th>Window</th><th>Message</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Hydration Alert</strong></td><td>Every 3 hours</td><td>09:00 – 21:00</td><td>"Time to stretch and log a glass of water!"</td></tr>
+      <tr><td><strong>Log Mood Nudge</strong></td><td>Log absent by evening</td><td>18:30</td><td>"How was your day? Log your mood to track trends."</td></tr>
+      <tr><td><strong>Burnout Warning</strong></td><td>Prediction = High</td><td>Immediately</td><td>"You've been working long hours. Take a screen-free break."</td></tr>
+      <tr><td><strong>Walk Incentive</strong></td><td>Steps ≤ 3000 by mid-afternoon</td><td>15:00</td><td>"Step count is low. It's sunny; perfect for a walk."</td></tr>
+      <tr><td><strong>Sleep Prompt</strong></td><td>Historic sleep ≤ 6h</td><td>22:00</td><td>"Ready for bed? Target early rest to recharge."</td></tr>
+    </tbody>
+  </table>
+
+  <h3>12.2 Architecture</h3>
+  <ul>
+    <li><strong>Backend Rules Engine:</strong> Evaluates telemetry inputs against rule conditions</li>
+    <li><strong>Frontend Local Scheduler:</strong> <code>flutter_local_notifications</code> with timezone-aware scheduling</li>
+    <li><strong>Quiet Hours:</strong> Adjusts alarms to avoid 10 PM – 7 AM window</li>
+    <li><strong>Priority Levels:</strong> High (system dialog overlay), Medium (push notification)</li>
+  </ul>
+</div>
+
+<!-- ======== SECTION 13 ======== -->
+<div class="section page-break" id="sec13">
+  <div class="section-header">
+    <div class="section-number">13</div>
+    <h2>Product Design &amp; UI/UX Specifications</h2>
+  </div>
+
+  <h3>13.1 Design System</h3>
+
+  <h4>Color Palette</h4>
+  <table>
+    <thead><tr><th>Token</th><th>Light Mode</th><th>Dark Mode</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Primary</strong></td><td style="color:#1E88E5">■ #1E88E5</td><td style="color:#64B5F6">■ #64B5F6</td><td>Brand color, active buttons</td></tr>
+      <tr><td><strong>Secondary</strong></td><td style="color:#00ACC1">■ #00ACC1</td><td style="color:#4DD0E1">■ #4DD0E1</td><td>Progress bars, wellness metrics</td></tr>
+      <tr><td><strong>Background</strong></td><td>■ #F5F7FA</td><td>■ #121214</td><td>Main screen background</td></tr>
+      <tr><td><strong>Surface</strong></td><td>■ #FFFFFF</td><td>■ #1E1E24</td><td>Cards, dialogs, inputs</td></tr>
+      <tr><td><strong>Error</strong></td><td style="color:#D84315">■ #D84315</td><td style="color:#FF7043">■ #FF7043</td><td>Alerts, high burnout warnings</td></tr>
+      <tr><td><strong>Success</strong></td><td style="color:#43A047">■ #43A047</td><td style="color:#81C784">■ #81C784</td><td>Completed goals, low risk</td></tr>
+      <tr><td><strong>Warning</strong></td><td style="color:#F57C00">■ #F57C00</td><td style="color:#FFB74D">■ #FFB74D</td><td>Medium risk indicators</td></tr>
+    </tbody>
+  </table>
+
+  <h4>Typography (Inter Typeface)</h4>
+  <table>
+    <thead><tr><th>Style</th><th>Size</th><th>Weight</th><th>Usage</th></tr></thead>
+    <tbody>
+      <tr><td>Headline Large</td><td>32sp</td><td>Bold</td><td>Splash &amp; Onboarding Titles</td></tr>
+      <tr><td>Headline Medium</td><td>24sp</td><td>Semi-Bold</td><td>Primary Page Headers</td></tr>
+      <tr><td>Title Large</td><td>18sp</td><td>Semi-Bold</td><td>Card Titles</td></tr>
+      <tr><td>Body Large</td><td>16sp</td><td>Regular</td><td>Main text, Chat dialogue</td></tr>
+      <tr><td>Body Medium</td><td>14sp</td><td>Regular</td><td>Secondary text</td></tr>
+      <tr><td>Label Small</td><td>12sp</td><td>Medium</td><td>Captions, timestamps</td></tr>
+    </tbody>
+  </table>
+
+  <h4>Spacing &amp; Grid</h4>
+  <p>4px-base grid system: Layout Margin = 16dp, Card Padding = 16dp, Corner Radius = 12dp (inputs), 16dp (cards), 24dp (bottom sheets).</p>
+
+  <h3>13.2 Accessibility (WCAG 2.1 Compliance)</h3>
+  <ul>
+    <li><strong>Touch Targets:</strong> Minimum 48dp × 48dp hit area</li>
+    <li><strong>Contrast Ratio:</strong> Minimum 4.5:1 for text in both modes</li>
+    <li><strong>Dynamic Font Scaling:</strong> Flexible widgets handle system font size changes</li>
+    <li><strong>Screen Reader Labels:</strong> All icons include <code>semanticsLabel</code></li>
+  </ul>
+</div>
+
+<!-- ======== SECTION 14 ======== -->
+<div class="section page-break" id="sec14">
+  <div class="section-header">
+    <div class="section-number">14</div>
+    <h2>Application Features &amp; Screen Specifications</h2>
+  </div>
+
+  <h3>14.1 Navigation Map</h3>
+  <div class="diagram-box">
+<pre>
+[Splash Screen] ──(First Launch)──► [Onboarding (3 Slides)]
+       │
+  (Session Check)
+       ├──► [Unauthenticated] ──► [Login] ◄──► [Register] ──► [Forgot Password]
+       │
+       └──► [Authenticated] ──► [Dashboard (Main Host)]
+                                       ├── Tab 1: Dashboard Home
+                                       ├── Tab 2: Mood Calendar &amp; Logger
+                                       ├── Tab 3: Gemini Chat Assistant
+                                       ├── Tab 4: Reports &amp; Charts
+                                       └── Navigation Drawer:
+                                                ├── [Profile Management]
+                                                ├── [Notifications Center]
+                                                └── [Settings Controls]
+</pre>
+  </div>
+
+  <h3>14.2 Dashboard Screen</h3>
+  <div class="diagram-box">
+<pre>
++-------------------------------------------------------------+
+|  [Avatar]  Good Morning, Jane!                [Bell] [Gear]  |
+|  Tuesday, July 21                                            |
++-------------------------------------------------------------+
+|  +-------------------------------------------------------+  |
+|  |  WEATHER WIDGET                                       |  |
+|  |  24°C - Mostly Clear (Sunny)                          |  |
+|  |  Nudge: "It's nice outside. Take a 10-min walk."      |  |
+|  +-------------------------------------------------------+  |
++-------------------------------------------------------------+
+|  +---------------------------+ +--------------------------+  |
+|  |  WELLNESS SCORE           | |  BURNOUT RISK            |  |
+|  |  [  78 / 100  ]           | |  [  MEDIUM  ]            |  |
+|  |  Good progress this week  | |  Risk score: 42%         |  |
+|  +---------------------------+ +--------------------------+  |
++-------------------------------------------------------------+
+|  DAILY TELEMETRY                                             |
+|  +--------------+ +--------------+ +----------------------+  |
+|  | Steps: 4,230 | | Water: 4/8   | | Sleep: 6.5h          |  |
+|  +--------------+ +--------------+ +----------------------+  |
++-------------------------------------------------------------+
+|  QUICK ACTIONS                                               |
+|  [ Log Mood ]    [ Ask AI Coach ]    [ View Charts ]         |
++-------------------------------------------------------------+
+</pre>
+  </div>
+
+  <h3>14.3 Mood Journal Screen</h3>
+  <ul>
+    <li><strong>Mood Selector:</strong> Horizontal icons – Very Happy, Happy, Neutral, Sad, Anxious, Exhausted, Angry</li>
+    <li><strong>Sliders:</strong> Stress Level (1–10: Calm → Severe) and Energy Level (1–10: Exhausted → Vibrant)</li>
+    <li><strong>Journal Input:</strong> Multi-line text field (500 chars) with live character counter</li>
+    <li><strong>Context Tags:</strong> Multi-select chips (work, meeting, deadline, exercise, social, diet)</li>
+  </ul>
+
+  <h3>14.4 AI Chat Screen</h3>
+  <ul>
+    <li><strong>Header:</strong> "AI Wellness Coach" title, "Powered by Gemini" sub-caption, Clear Chat button</li>
+    <li><strong>Conversation List:</strong> Scrollable messages with markdown rendering</li>
+    <li><strong>Footer:</strong> Prompt suggestion chips, text input field, Send button</li>
+    <li><strong>States:</strong> Skeleton loading, three-dot typing animation, empty state with coach icon</li>
+  </ul>
+
+  <h3>14.5 Reports &amp; Analytics Screen</h3>
+  <ul>
+    <li><strong>Time Filters:</strong> 7 Days, 30 Days, 90 Days tabs</li>
+    <li><strong>Charts:</strong> Mood &amp; Stress line chart, Sleep &amp; Steps bar chart (fl_chart)</li>
+    <li><strong>AI Summary Card:</strong> Gemini-generated wellness summary</li>
+    <li><strong>Export FAB:</strong> PDF or CSV export button</li>
+  </ul>
+
+  <h3>14.6 Profile &amp; Settings</h3>
+  <ul>
+    <li><strong>Profile:</strong> Avatar, name, occupation, joined date, mood log count, active streak</li>
+    <li><strong>Settings:</strong> Dark Mode toggle, notification toggles, password change, Export Data, Delete Account</li>
+  </ul>
+</div>
+
+<!-- ======== SECTION 15 ======== -->
+<div class="section page-break" id="sec15">
+  <div class="section-header">
+    <div class="section-number">15</div>
+    <h2>Security Architecture &amp; Audit</h2>
+  </div>
+
+  <h3>15.1 Security Flow</h3>
+  <div class="diagram-box">
+<pre>
+Flutter Client ──► HTTPS/SSL ──► Dio Interceptor (Bearer Token)
+       │
+       ▼
+FastAPI Backend ──► Verify Firebase ID Token
+       │
+       ├── Valid ──► Firestore Rules Check ──► Owner Match ──► Allow Access
+       │
+       └── Invalid ──► Return 401 Unauthorized
+</pre>
+  </div>
+
+  <h3>15.2 Firebase Access Rules</h3>
+  <table>
+    <thead><tr><th>Collection</th><th>Access Rule</th></tr></thead>
+    <tbody>
+      <tr><td>/users/{userId}</td><td>Restricted to document owner (auth.uid == userId)</td></tr>
+      <tr><td>/mood_logs/{logId}</td><td>Auth required; owner UID comparison enforced</td></tr>
+      <tr><td>/burnout_predictions/{predId}</td><td>Auth required; owner UID comparison enforced</td></tr>
+      <tr><td>/chat_sessions/{sessionId}</td><td>Auth required; owner UID comparison enforced</td></tr>
+      <tr><td>/recommendations/{recId}</td><td>Auth required; owner UID comparison enforced</td></tr>
+      <tr><td>/notifications/{notifId}</td><td>Auth required; owner UID comparison enforced</td></tr>
+    </tbody>
+  </table>
+
+  <h3>15.3 OWASP Top 10 Compliance</h3>
+  <table>
+    <thead><tr><th>OWASP Item</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr><td>Broken Object Level Auth (B1)</td><td>Firebase ID Token matching Firestore client scopes</td></tr>
+      <tr><td>Broken User Authentication (B2)</td><td>Firebase Auth JWT with expiration and signature validation</td></tr>
+      <tr><td>Excessive Data Exposure (B3)</td><td>Standardized response filtering (no key dumps)</td></tr>
+      <tr><td>Rate Limiting (B4)</td><td>Sliding window: 60 requests/minute/IP</td></tr>
+      <tr><td>Security Misconfiguration (B5)</td><td>CORS restricted, HSTS, CSP, X-Frame-Options headers</td></tr>
+    </tbody>
+  </table>
+
+  <h3>15.4 AI &amp; Prompt Security</h3>
+  <ul>
+    <li><strong>Prompt Injection Defense:</strong> Sanitization filters blacklisted injection patterns</li>
+    <li><strong>Disclaimer Enforcement:</strong> Medical disclaimer appended to every LLM output</li>
+    <li><strong>Key Storage:</strong> API credentials loaded at runtime from environment configs, never in version control</li>
+  </ul>
+</div>
+
+<!-- ======== SECTION 16 ======== -->
+<div class="section page-break" id="sec16">
+  <div class="section-header">
+    <div class="section-number">16</div>
+    <h2>Quality Assurance &amp; Testing</h2>
+  </div>
+
+  <h3>16.1 Testing Frameworks</h3>
+  <table>
+    <thead><tr><th>Layer</th><th>Framework</th><th>Coverage</th></tr></thead>
+    <tbody>
+      <tr><td>Backend API</td><td>Pytest + FastAPI TestClient</td><td>Health checks, analytics, predictions, security</td></tr>
+      <tr><td>Client Unit</td><td>Flutter Test + Mocktail</td><td>Repositories, Providers, Validators</td></tr>
+      <tr><td>Widget Testing</td><td>Flutter Test</td><td>Screen rendering, navigation, input testing</td></tr>
+    </tbody>
+  </table>
+
+  <h3>16.2 Load Testing Results</h3>
+  <table>
+    <thead><tr><th>Concurrent Users</th><th>API Latency</th><th>ML Predict Time</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>10</td><td>&lt; 5ms</td><td>&lt; 12ms</td><td style="color: #43A047;">✅ Normal</td></tr>
+      <tr><td>100</td><td>&lt; 10ms</td><td>&lt; 15ms</td><td style="color: #43A047;">✅ Moderate</td></tr>
+      <tr><td>500</td><td>&lt; 20ms</td><td>&lt; 15ms</td><td style="color: #F57C00;">⚠️ Scaled (cache required)</td></tr>
+      <tr><td>1000</td><td>Variable</td><td>CPU bound</td><td style="color: #D84315;">⚠️ Requires cluster scaling</td></tr>
+    </tbody>
+  </table>
+
+  <h3>16.3 Error Recovery &amp; Resilience</h3>
+  <table>
+    <thead><tr><th>Failure Type</th><th>Recovery Strategy</th></tr></thead>
+    <tbody>
+      <tr><td>Firestore Downtime</td><td>Local Hive data cache serves cached summaries</td></tr>
+      <tr><td>Gemini API Downtime</td><td>Retry 3x with exponential backoff → rule-based fallback text</td></tr>
+      <tr><td>ML Model Failure</td><td>Pickle checksum verification → heuristics formula fallback</td></tr>
+      <tr><td>Network Loss</td><td>Offline queue in Hive → auto-sync on reconnection</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ======== SECTION 17 ======== -->
+<div class="section page-break" id="sec17">
+  <div class="section-header">
+    <div class="section-number">17</div>
+    <h2>Performance, Caching &amp; Offline Sync</h2>
+  </div>
+
+  <h3>17.1 Performance Benchmarks</h3>
+  <table>
+    <thead><tr><th>Metric</th><th>Target</th><th>Actual</th></tr></thead>
+    <tbody>
+      <tr><td>App Cold Startup</td><td>&lt; 2.0s</td><td><strong>1.1s</strong></td></tr>
+      <tr><td>Screen Load Time</td><td>&lt; 100ms</td><td><strong>40ms</strong></td></tr>
+      <tr><td>ML Prediction Endpoint</td><td>&lt; 50ms</td><td><strong>12ms</strong></td></tr>
+      <tr><td>Gemini AI Response</td><td>&lt; 2.0s</td><td><strong>1.3s</strong></td></tr>
+      <tr><td>API Request Latency</td><td>&lt; 150ms</td><td><strong>22ms</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h3>17.2 Multi-Layer Caching Strategy</h3>
+  <table>
+    <thead><tr><th>Data Type</th><th>Cache Location</th><th>TTL</th><th>Fallback</th></tr></thead>
+    <tbody>
+      <tr><td>User Profile</td><td>Client Hive + Server</td><td>24 Hours</td><td>Offline cache load</td></tr>
+      <tr><td>Settings</td><td>Client Hive</td><td>Infinite</td><td>Restore defaults</td></tr>
+      <tr><td>Telemetry Logs</td><td>Client Hive</td><td>12 Hours</td><td>Fetch from Firestore</td></tr>
+      <tr><td>Recommendations</td><td>Backend + Client</td><td>12 Hours</td><td>Rule-based defaults</td></tr>
+      <tr><td>Weather</td><td>Client memory</td><td>1 Hour</td><td>Cached weather</td></tr>
+    </tbody>
+  </table>
+
+  <h3>17.3 Offline Synchronization Flow</h3>
+  <ol>
+    <li><strong>Local Writes:</strong> Mood logs and settings written immediately to Hive</li>
+    <li><strong>Push Queue:</strong> Failed Firestore writes are queued in <code>addToQueue()</code></li>
+    <li><strong>Reactive Listener:</strong> <code>ConnectivityService</code> monitors network → <code>SyncEngine</code> pushes queued items on reconnection</li>
+    <li><strong>Visual Banner:</strong> Dashboard shows offline indicator banner</li>
+  </ol>
+</div>
+
+<!-- ======== SECTION 18 ======== -->
+<div class="section page-break" id="sec18">
+  <div class="section-header">
+    <div class="section-number">18</div>
+    <h2>Cloud Deployment &amp; DevOps</h2>
+  </div>
+
+  <h3>18.1 Environment Matrix</h3>
+  <table>
+    <thead><tr><th>Variable</th><th>Dev</th><th>Test</th><th>Staging</th><th>Production</th></tr></thead>
+    <tbody>
+      <tr><td>ENV</td><td>development</td><td>testing</td><td>staging</td><td>production</td></tr>
+      <tr><td>CORS</td><td>*</td><td>*</td><td>staging.mindsync.ai</td><td>app.mindsync.ai</td></tr>
+      <tr><td>Rate Limit</td><td>100/min</td><td>1000/min</td><td>60/min</td><td>60/min</td></tr>
+      <tr><td>Security Headers</td><td>false</td><td>false</td><td>true</td><td>true</td></tr>
+    </tbody>
+  </table>
+
+  <h3>18.2 Backend Deployment (Render/Railway)</h3>
+  <ol>
+    <li>Register web service linked to repository</li>
+    <li>Set Root Directory: <code>backend</code></li>
+    <li>Build: <code>pip install -r requirements.txt</code> or Docker</li>
+    <li>Start: <code>uvicorn app.main:app --host 0.0.0.0 --port $PORT</code></li>
+    <li>Configure environment variables and secrets</li>
+  </ol>
+
+  <h3>18.3 Flutter Release Builds</h3>
+  <pre><code># Release APK
+flutter build apk --release
+
+# Android App Bundle (Google Play Store)
+flutter build appbundle --release</code></pre>
+
+  <h3>18.4 Semantic Versioning</h3>
+  <p>Format: <strong>Major.Minor.Patch</strong> (e.g., 1.0.0 → initial launch, 1.0.1 → hotfix, 1.1.0 → feature update)</p>
+
+  <h3>18.5 Database Backup &amp; Recovery</h3>
+  <pre><code># Daily Firestore Export (GCP Scheduler)
+gcloud firestore export gs://mindsync-firestore-backups-bucket
+
+# Restoration
+gcloud firestore import gs://mindsync-firestore-backups-bucket/2026-07-23T08:00:00/</code></pre>
+</div>
+
+<!-- ======== SECTION 19 ======== -->
+<div class="section page-break" id="sec19">
+  <div class="section-header">
+    <div class="section-number">19</div>
+    <h2>Project Directory Structure</h2>
+  </div>
+
+  <h3>19.1 Flutter Frontend</h3>
+  <div class="diagram-box">
+<pre>
+frontend/
+├── assets/
+│   ├── animations/           # Lottie JSON configurations
+│   ├── icons/                # Material vectors and SVGs
+│   ├── images/               # App branding files
+│   └── .env                  # Environment variables
+├── lib/
+│   ├── core/
+│   │   ├── config/           # App configuration (demoMode switch)
+│   │   ├── constants/        # API endpoints, box names, static strings
+│   │   ├── demo/             # Mock auth, mood, chat, reports, profile, notifications
+│   │   ├── errors/           # Failures and Exception types
+│   │   ├── network/          # Dio configurations and interceptors
+│   │   ├── routing/          # GoRouter pages register
+│   │   ├── services/         # Storage (Hive) initialization, sync engine
+│   │   └── theme/            # Theme setups and typography config
+│   ├── features/
+│   │   ├── authentication/   # Login, Register, Splash, Onboarding
+│   │   ├── burnout/          # ML prediction display
+│   │   ├── chat/             # Gemini AI wellness coach
+│   │   ├── dashboard/        # Home experience page
+│   │   ├── mood/             # Mood journaling &amp; history
+│   │   ├── notifications/    # Smart alerts center
+│   │   ├── profile/          # User profile management
+│   │   ├── recommendations/  # Context-aware suggestions
+│   │   ├── reports/          # Analytics &amp; charts
+│   │   └── settings/         # App preferences
+│   ├── shared/
+│   │   ├── models/           # Shared models
+│   │   └── widgets/          # Shared components (buttons, loaders)
+│   └── main.dart
+└── test/
+    ├── unit/                 # Business logic tests
+    ├── widget/               # UI rendering tests
+    └── integration/          # Navigation flow tests
+</pre>
+  </div>
+
+  <h3>19.2 FastAPI Backend</h3>
+  <div class="diagram-box">
+<pre>
+backend/
+├── app/
+│   ├── api/
+│   │   ├── routers/          # auth_router, mood_router, prediction_router, chat_router
+│   │   └── dependencies/     # auth_bearer, rate_limiter
+│   ├── core/                 # config, security, exceptions
+│   ├── models/               # Domain dataclasses
+│   ├── schemas/              # Pydantic validation schemas
+│   ├── services/             # ai_service, ml_service, weather_service
+│   └── main.py               # App bootstrap
+├── ml/
+│   ├── dataset/              # raw_burnout_dataset.csv
+│   ├── models/               # burnout_model.pkl
+│   ├── train.py              # Training script
+│   └── evaluate.py           # Evaluation script
+├── tests/                    # Pytest test suites
+├── Dockerfile                # Container config
+├── docker-compose.yml        # Multi-service orchestration
+└── requirements.txt          # Python dependencies
+</pre>
+  </div>
+</div>
+
+<!-- ======== SECTION 20 ======== -->
+<div class="section page-break" id="sec20">
+  <div class="section-header">
+    <div class="section-number">20</div>
+    <h2>Development Roadmap &amp; Modules</h2>
+  </div>
+
+  <table>
+    <thead><tr><th>Module</th><th>Objective</th><th>Key Deliverables</th><th>Dependencies</th></tr></thead>
+    <tbody>
+      <tr><td><strong>1. Core Scaffold</strong></td><td>Workspace configurations</td><td>Themes, GoRouter, Hive, Dio client</td><td>None</td></tr>
+      <tr><td><strong>2. Authentication</strong></td><td>Secure login &amp; onboarding</td><td>Firebase Auth, Login/Register, Onboarding carousel</td><td>Module 1</td></tr>
+      <tr><td><strong>3. Dashboard</strong></td><td>Home experience</td><td>Dashboard grid, wellness score, weather widget</td><td>Module 2</td></tr>
+      <tr><td><strong>4. Mood Journaling</strong></td><td>Log tracking</td><td>Mood wheel, stress slider, calendar view</td><td>Module 3</td></tr>
+      <tr><td><strong>5. Gemini Chat</strong></td><td>AI wellness coaching</td><td>Chat console, system prompts, session histories</td><td>Module 4</td></tr>
+      <tr><td><strong>6. ML Predictor</strong></td><td>Burnout classification</td><td>Training script, model, SHAP, evaluation</td><td>Module 4</td></tr>
+      <tr><td><strong>7. FastAPI Backend</strong></td><td>Backend computing</td><td>API routes, ML wrapper, Gemini connection</td><td>Modules 5, 6</td></tr>
+      <tr><td><strong>8. Reports &amp; Charts</strong></td><td>Performance summaries</td><td>Weekly graphs (fl_chart), AI summaries, PDF export</td><td>Modules 4, 7</td></tr>
+      <tr><td><strong>9. Notifications</strong></td><td>Habit reminders</td><td>Push &amp; local notifications, scheduler</td><td>Modules 3, 8</td></tr>
+      <tr><td><strong>10. Profile &amp; Settings</strong></td><td>App preferences</td><td>Theme config, data export/delete</td><td>Module 2</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ======== SECTION 21 ======== -->
+<div class="section" id="sec21">
+  <div class="section-header">
+    <div class="section-number">21</div>
+    <h2>Risk Analysis &amp; Mitigation</h2>
+  </div>
+
+  <table>
+    <thead><tr><th>Risk</th><th>Impact</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr><td>Firebase Connection Outages</td><td>Data inaccessibility</td><td>Local Hive caches for offline read/write with sync queue</td></tr>
+      <tr><td>API Rate Limiting (Gemini/OpenWeather)</td><td>Service degradation</td><td>Cached forecasts + rule-based fallback responses</td></tr>
+      <tr><td>Sensor Incompatibilities</td><td>Missing activity data</td><td>Graceful degradation to manual log interfaces</td></tr>
+      <tr><td>Inappropriate AI Outputs</td><td>User safety concern</td><td>High safety thresholds, content filters, medical disclaimer</td></tr>
+      <tr><td>ML Model Corruption</td><td>Prediction failures</td><td>Pickle checksum validation → heuristics fallback</td></tr>
+      <tr><td>Cross-User Data Leakage</td><td>Privacy violation</td><td>Strict Firestore rules + backend UID verification</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ======== SECTION 22 ======== -->
+<div class="section" id="sec22">
+  <div class="section-header">
+    <div class="section-number">22</div>
+    <h2>Future Enhancements &amp; Scalability</h2>
+  </div>
+
+  <table>
+    <thead><tr><th>Enhancement</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Wearable API Integration</strong></td><td>Dedicated domain layers for steps, heart rate, and sleep from smartwatches</td></tr>
+      <tr><td><strong>Load Balancing</strong></td><td>Multiple containers via AWS ECS / Render scaling behind Nginx</td></tr>
+      <tr><td><strong>Model Partitioning</strong></td><td>Isolate SHAP calculations into micro-workers for concurrency</td></tr>
+      <tr><td><strong>iOS Release</strong></td><td>Flutter cross-platform build for App Store distribution</td></tr>
+      <tr><td><strong>Team Wellness Dashboard</strong></td><td>Manager-level aggregated insights (anonymized)</td></tr>
+      <tr><td><strong>Advanced ML Models</strong></td><td>Deep learning models for time-series burnout trend prediction</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ======== FOOTER ======== -->
+<div class="page-footer">
+  <strong>MindSync AI</strong> – AI-Driven Mental Wellness Companion for IT Professionals<br>
+  Module: CMP7003 – Emerging Mobile Applications • Version 1.0.0 • July 2026<br>
+  <em>This document contains confidential project information. All rights reserved.</em>
+</div>
+
+</div><!-- end .content -->
+</body>
+</html>

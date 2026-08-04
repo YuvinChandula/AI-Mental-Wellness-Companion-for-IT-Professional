@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+tests/
+.git/
+.env
+.gitignore
+venv/
+.venv/
+htmlcov/
+.coverage
+*.log
+firebase-credentials.json

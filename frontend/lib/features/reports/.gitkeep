@@ -1,0 +1,4 @@
+# Reports Feature Layout
+# data/         - Datasources, Models, Repositories implementations
+# domain/       - Entities, UseCases, Repositories abstract interfaces
+# presentation/ - Pages, Providers, Widgets layout controllers

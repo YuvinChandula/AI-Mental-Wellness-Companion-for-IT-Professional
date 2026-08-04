@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV=development
+      - PORT=8000
+      - ALLOWED_ORIGINS=*
+      - RATE_LIMIT_PER_MINUTE=60
+      - SECURE_HEADERS_ENABLED=false
+      - FIREBASE_CREDENTIALS_PATH=/workspace/firebase-credentials.json
+    volumes:
+      - .:/workspace
+      - /workspace/app/ml/models
