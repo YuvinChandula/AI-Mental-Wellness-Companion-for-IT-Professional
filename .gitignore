@@ -50,6 +50,9 @@ env
 htmlcov/
 .log
 
+# Firebase credentials (NEVER commit to Git)
+backend/firebase-credentials.json
+
 # Environment variables (ignore sensitive config files, but track .env.example)
 .env
 .env.local
