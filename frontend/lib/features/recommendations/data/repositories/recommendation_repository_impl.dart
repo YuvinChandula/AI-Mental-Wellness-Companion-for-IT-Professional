@@ -31,7 +31,7 @@ class RecommendationRepositoryImpl implements RecommendationRepository {
   }) async {
     try {
       final response = await _dio.post<Map<String, dynamic>>(
-        'http://localhost:8000/api/recommendations/generate',
+        'https://ai-mental-wellness-companion-for-it.onrender.com/api/recommendations/generate',
         options: Options(
           headers: <String, String>{
             'Authorization': 'Bearer mock_token_for_testing',
@@ -110,7 +110,7 @@ class RecommendationRepositoryImpl implements RecommendationRepository {
 
       // 2. Dispatch to backend feedback logging service
       await _dio.post<Map<String, dynamic>>(
-        'http://localhost:8000/api/recommendations/feedback',
+        'https://ai-mental-wellness-companion-for-it.onrender.com/api/recommendations/feedback',
         options: Options(
           headers: <String, String>{
             'Authorization': 'Bearer mock_token_for_testing',

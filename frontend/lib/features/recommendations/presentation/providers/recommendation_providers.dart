@@ -207,7 +207,7 @@ final FutureProvider<Map<String, dynamic>> dailySummaryStateProvider = FuturePro
   final dio = Dio();
   try {
     final response = await dio.post<Map<String, dynamic>>(
-      'http://localhost:8000/api/recommendations/daily-summary',
+      'https://ai-mental-wellness-companion-for-it.onrender.com/api/recommendations/daily-summary',
       options: Options(
         headers: <String, String>{
           'Authorization': 'Bearer mock_token_for_testing',

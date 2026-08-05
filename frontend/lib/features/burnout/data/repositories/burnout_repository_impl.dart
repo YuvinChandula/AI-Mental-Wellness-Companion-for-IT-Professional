@@ -32,7 +32,7 @@ class BurnoutRepositoryImpl implements BurnoutRepository {
     try {
       // Hit FastAPI prediction backend (Assumes local deployment port 8000)
       final response = await _dio.post<Map<String, dynamic>>(
-        'http://localhost:8000/api/predict/burnout',
+        'https://ai-mental-wellness-companion-for-it.onrender.com/api/predict/burnout',
         options: Options(
           headers: <String, String>{
             'Authorization': 'Bearer mock_token_for_testing',
