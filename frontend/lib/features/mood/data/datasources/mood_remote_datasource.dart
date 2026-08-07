@@ -51,9 +51,10 @@ class MoodRemoteDataSourceImpl implements MoodRemoteDataSource {
     try {
       final snapshot = await _collection
           .where('userId', isEqualTo: userId)
-          .orderBy('createdAt', descending: true)
           .get();
-      return snapshot.docs.map((doc) => MoodLogModel.fromFirestore(doc)).toList();
+      final list = snapshot.docs.map((doc) => MoodLogModel.fromFirestore(doc)).toList();
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return list;
     } catch (e) {
       throw ServerException(message: 'Failed to load history: ${e.toString()}');
     }

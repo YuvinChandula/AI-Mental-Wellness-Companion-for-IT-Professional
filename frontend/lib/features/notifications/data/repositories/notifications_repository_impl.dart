@@ -69,7 +69,38 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
             .map((dynamic e) => AppNotificationModel.fromMap(Map<String, dynamic>.from(e as Map)))
             .toList();
       }
-      return <AppNotification>[];
+      final List<AppNotificationModel> initialNotifications = <AppNotificationModel>[
+        AppNotificationModel(
+          notificationId: 'notif_welcome_${DateTime.now().millisecondsSinceEpoch}',
+          userId: _userId,
+          title: 'Welcome to MindSync AI 🌿',
+          message: 'Your personal AI Mental Wellness companion is active. Track your daily mood, exercise, and hydration for resilience insights.',
+          type: 'reminder',
+          priority: 'medium',
+          scheduledTime: DateTime.now(),
+          sentTime: DateTime.now(),
+          status: 'sent',
+          isRead: false,
+          source: 'system',
+          createdAt: DateTime.now(),
+        ),
+        AppNotificationModel(
+          notificationId: 'notif_hydration_${DateTime.now().millisecondsSinceEpoch - 3600000}',
+          userId: _userId,
+          title: 'Hydration & Break Reminder 💧',
+          message: 'Continuous screen time increases cognitive fatigue. Take a 5-minute break and drink a glass of water.',
+          type: 'water',
+          priority: 'high',
+          scheduledTime: DateTime.now().subtract(const Duration(hours: 1)),
+          sentTime: DateTime.now().subtract(const Duration(hours: 1)),
+          status: 'sent',
+          isRead: false,
+          source: 'system',
+          createdAt: DateTime.now().subtract(const Duration(hours: 1)),
+        ),
+      ];
+      await box.put(cacheKey, initialNotifications.map((AppNotificationModel m) => m.toMap()).toList());
+      return initialNotifications;
     }
   }
 

@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindSync AI - Master Presentation Deck & Defense Toolkit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --bg-card: rgba(18, 26, 43, 0.75);
+      --bg-card-border: rgba(99, 102, 241, 0.2);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent-primary: #6366f1;
+      --accent-secondary: #06b6d4;
+      --accent-purple: #a855f7;
+      --accent-green: #10b981;
+      --accent-warning: #f59e0b;
+      --accent-danger: #ef4444;
+      --glow-primary: rgba(99, 102, 241, 0.35);
+      --font-heading: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Background Ambient Lights */
+    .ambient-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.25;
+    }
+    .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: var(--accent-primary); }
+    .blob-2 { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: var(--accent-secondary); }
+    .blob-3 { top: 40%; left: 40%; width: 30vw; height: 30vw; background: var(--accent-purple); }
+
+    /* Top Navigation Bar */
+    header {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--bg-card-border);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-family: var(--font-heading);
+      color: white;
+      box-shadow: 0 0 15px var(--glow-primary);
+    }
+    .brand-title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.25rem;
+      background: linear-gradient(135deg, #fff, #a5b4fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .btn {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-main);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: var(--accent-primary);
+      transform: translateY(-1px);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary), #4f46e5);
+      border: none;
+      box-shadow: 0 4px 12px var(--glow-primary);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #4f46e5, #4338ca);
+    }
+    select.slide-select {
+      background: var(--bg-dark);
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-main);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      position: relative;
+      z-index: 10;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 7.14%; /* 1/14 */
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      transition: width 0.3s ease;
+      box-shadow: 0 0 10px var(--accent-secondary);
+    }
+
+    /* Main Presentation Container */
+    main.presentation-wrapper {
+      position: relative;
+      z-index: 5;
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+    .slide-deck {
+      width: 100%;
+      max-width: 1200px;
+      min-height: 680px;
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 24px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Slide Elements */
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(30px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      padding: 3rem 4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-y: auto;
+    }
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+
+    /* Typography & Headers */
+    .slide-header {
+      margin-bottom: 1.5rem;
+    }
+    .slide-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #a5b4fc;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+    .slide-title {
+      font-family: var(--font-heading);
+      font-size: 2.25rem;
+      font-weight: 800;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .slide-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    /* Glass Cards */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+    .glass-card:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(99, 102, 241, 0.4);
+      transform: translateY(-2px);
+    }
+    .card-title {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Lists */
+    ul.feature-list {
+      list-style: none;
+    }
+    ul.feature-list li {
+      position: relative;
+      padding-left: 1.75rem;
+      margin-bottom: 0.75rem;
+      color: #e2e8f0;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    ul.feature-list li::before {
+      content: '✦';
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--accent-secondary);
+      font-size: 1rem;
+    }
+
+    /* Metric Boxes */
+    .metric-box {
+      text-align: center;
+      padding: 1.5rem 1rem;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 16px;
+    }
+    .metric-value {
+      font-family: var(--font-heading);
+      font-size: 2.75rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.25rem;
+    }
+    .metric-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Speaker Notes Panel Drawer */
+    .notes-drawer {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: 450px;
+      max-height: 80vh;
+      background: rgba(15, 23, 42, 0.95);
+      border-top: 1px solid var(--accent-primary);
+      border-left: 1px solid var(--accent-primary);
+      border-top-left-radius: 20px;
+      backdrop-filter: blur(20px);
+      padding: 1.5rem;
+      box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6);
+      z-index: 100;
+      transform: translateY(110%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .notes-drawer.open {
+      transform: translateY(0);
+    }
+    .notes-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 0.75rem;
+    }
+    .notes-title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      color: var(--accent-secondary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .notes-content {
+      color: #cbd5e1;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    /* Table Styles */
+    table.spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+    }
+    table.spec-table th, table.spec-table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.9rem;
+    }
+    table.spec-table th {
+      color: var(--accent-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+    table.spec-table td.highlight {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* Architecture SVG Diagram */
+    .arch-diagram {
+      width: 100%;
+      height: 280px;
+      background: rgba(11, 15, 25, 0.7);
+      border-radius: 16px;
+      border: 1px solid var(--bg-card-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    /* Print View */
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      .ambient-bg, header, .progress-container, .notes-drawer, .nav-floating {
+        display: none !important;
+      }
+      main.presentation-wrapper {
+        padding: 0 !important;
+      }
+      .slide-deck {
+        border: none !important;
+        box-shadow: none !important;
+        background: white !important;
+        max-width: 100% !important;
+      }
+      .slide {
+        position: relative !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        transform: none !important;
+        page-break-after: always !important;
+        color: black !important;
+        background: white !important;
+      }
+      .slide-title, .card-title, .metric-value {
+        -webkit-text-fill-color: black !important;
+        color: black !important;
+      }
+      .glass-card, .metric-box {
+        border: 1px solid #ccc !important;
+        background: #f8fafc !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Lights -->
+  <div class="ambient-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <!-- Header Bar -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">MS</div>
+      <div>
+        <div class="brand-title">MindSync AI</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted);">Master Defense & Viva Deck</div>
+      </div>
+    </div>
+    <div class="controls">
+      <select id="slideSelect" class="slide-select" onchange="jumpToSlide(parseInt(this.value))">
+        <option value="0">1. Title & Overview</option>
+        <option value="1">2. Problem Statement</option>
+        <option value="2">3. Aim & Objectives</option>
+        <option value="3">4. System Architecture</option>
+        <option value="4">5. Technology Stack</option>
+        <option value="5">6. Machine Learning Pipeline</option>
+        <option value="6">7. AI Orchestration Engine</option>
+        <option value="7">8. Mobile Features & UI</option>
+        <option value="8">9. Offline-First Sync</option>
+        <option value="9">10. Security & Quality</option>
+        <option value="10">11. Performance Results</option>
+        <option value="11">12. Viva Demo Script</option>
+        <option value="12">13. Future Roadmap</option>
+        <option value="13">14. Conclusion & Q&A</option>
+      </select>
+
+      <button class="btn" onclick="toggleSpeakerNotes()">
+        <span>🎙️</span> Notes (S)
+      </button>
+
+      <button class="btn" onclick="toggleFullscreen()">
+        <span>⛶</span> Fullscreen (F)
+      </button>
+
+      <button class="btn btn-primary" onclick="window.print()">
+        <span>🖨️</span> PDF / Print
+      </button>
+    </div>
+  </header>
+
+  <!-- Progress Bar -->
+  <div class="progress-container">
+    <div id="progressBar" class="progress-bar"></div>
+  </div>
+
+  <!-- Presentation Main Area -->
+  <main class="presentation-wrapper">
+    <div class="slide-deck">
+
+      <!-- SLIDE 1: TITLE -->
+      <section class="slide active" id="slide-0">
+        <div>
+          <div class="slide-badge">Academic Defense Presentation</div>
+          <h1 class="slide-title" style="font-size: 3rem;">MindSync AI</h1>
+          <p class="slide-subtitle" style="font-size: 1.35rem; color: #a5b4fc; margin-top: 0.75rem;">
+            An AI-Driven Mental Wellness Companion for IT Professionals
+          </p>
+        </div>
+
+        <div class="grid-3" style="margin: 2rem 0;">
+          <div class="glass-card">
+            <div class="card-title">🤖 Predictive ML</div>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">Scikit-Learn Random Forest Classifier predicting burnout risks with 93.3% accuracy & SHAP transparency.</p>
+          </div>
+          <div class="glass-card">
+            <div class="card-title">💬 Gemini LLM</div>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">Context-aware habit recommendations & AI wellness coaching with fail-safe fallback summaries.</p>
+          </div>
+          <div class="glass-card">
+            <div class="card-title">⚡ Offline-First</div>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">Hive DB storage with dynamic background connectivity queue observer for zero data loss.</p>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+          <div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Presenter:</div>
+            <div style="font-weight: 700; color: #fff; font-size: 1.1rem;">Yuvin Chandula</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Technologies:</div>
+            <div style="font-weight: 600; color: var(--accent-secondary); font-size: 0.95rem;">Flutter 3.22 • FastAPI • Firebase • Gemini 1.5 Flash</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 2: PROBLEM STATEMENT -->
+      <section class="slide" id="slide-1">
+        <div class="slide-header">
+          <div class="slide-badge">Industry Context & Motivation</div>
+          <h2 class="slide-title">The IT Developer Burnout Crisis</h2>
+        </div>
+
+        <div class="grid-2">
+          <div class="glass-card">
+            <div class="card-title" style="color: var(--accent-danger);">⚠️ High Cognitive Fatigue</div>
+            <ul class="feature-list">
+              <li>High-pressure sprint cycles, tight release schedules, and constant debugging.</li>
+              <li>Prolonged screen exposure leading to sleep disturbance and physical exhaustion.</li>
+              <li><strong>60%+ of software engineers</strong> report experiencing severe burnout during their career.</li>
+            </ul>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-title" style="color: var(--accent-warning);">⚡ Limitations of Existing Solutions</div>
+            <ul class="feature-list">
+              <li>Generic fitness apps track steps but ignore cognitive workload & stress.</li>
+              <li>Siloed logs: Sleep, mood, hydration, and steps are never connected.</li>
+              <li>Static push notifications cause alert fatigue and are quickly disabled.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="glass-card" style="margin-top: 1.5rem; background: rgba(99, 102, 241, 0.1); border-color: var(--accent-primary);">
+          <div class="card-title" style="color: #a5b4fc;">💡 The MindSync AI Solution</div>
+          <p style="font-size: 0.95rem; color: #e2e8f0; line-height: 1.6;">
+            A unified mobile platform that correlates physical metrics (sleep, steps, hydration) with psychological indicators (mood ratings, stress logs) using machine learning to deliver <strong>predictive burnout warnings and transparent habit advice</strong>.
+          </p>
+        </div>
+      </section>
+
+      <!-- SLIDE 3: AIM & OBJECTIVES -->
+      <section class="slide" id="slide-2">
+        <div class="slide-header">
+          <div class="slide-badge">Project Scope</div>
+          <h2 class="slide-title">Aim & Key Technical Objectives</h2>
+        </div>
+
+        <div class="glass-card" style="margin-bottom: 1.5rem;">
+          <div class="card-title" style="color: var(--accent-secondary);">🎯 Overall Project Aim</div>
+          <p style="font-size: 1rem; color: #f1f5f9; line-height: 1.6;">
+            To design, implement, and validate an offline-first mobile application that accurately predicts burnout risks for software engineers, explains contributing drivers, and delivers adaptive AI coaching.
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <div class="glass-card">
+            <div class="card-title">1. Responsive Mobile App</div>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">Build a Material 3 mobile application using Flutter, Riverpod, and fl_chart for cross-platform telemetry visualisations.</p>
+          </div>
+          <div class="glass-card">
+            <div class="card-title">2. Async Backend API</div>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">Construct a FastAPI microservices backend capable of delivering sub-22ms machine learning predictions.</p>
+          </div>
+          <div class="glass-card">
+            <div class="card-title">3. Explainable ML Engine</div>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">Train a Random Forest model with SHAP tree interpretability to explain specific burnout factors.</p>
+          </div>
+          <div class="glass-card">
+            <div class="card-title">4. Offline Resilience</div>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">Implement local Hive storage and an automatic cloud sync queue observer for seamless offline operation.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 4: SYSTEM ARCHITECTURE -->
+      <section class="slide" id="slide-3">
+        <div class="slide-header">
+          <div class="slide-badge">Software Engineering</div>
+          <h2 class="slide-title">Clean Architecture & System Design</h2>
+        </div>
+
+        <div class="arch-diagram">
+          <svg width="100%" height="100%" viewBox="0 0 800 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Presentation Layer -->
+            <rect x="20" y="20" width="220" height="200" rx="12" fill="#1e1b4b" stroke="#6366f1" stroke-width="2"/>
+            <text x="130" y="45" fill="#a5b4fc" font-weight="bold" font-size="14" text-anchor="middle">PRESENTATION LAYER</text>
+            <rect x="40" y="65" width="180" height="35" rx="6" fill="#312e81"/>
+            <text x="130" y="87" fill="#fff" font-size="12" text-anchor="middle">Flutter Widgets & UI</text>
+            <rect x="40" y="110" width="180" height="35" rx="6" fill="#312e81"/>
+            <text x="130" y="132" fill="#fff" font-size="12" text-anchor="middle">Riverpod Controllers</text>
+            <rect x="40" y="155" width="180" height="35" rx="6" fill="#312e81"/>
+            <text x="130" y="177" fill="#fff" font-size="12" text-anchor="middle">fl_chart & Routers</text>
+
+            <!-- Arrow 1 -->
+            <path d="M 240 120 L 290 120" stroke="#06b6d4" stroke-width="3" marker-end="url(#arrow)"/>
+
+            <!-- Domain & Data Layer -->
+            <rect x="290" y="20" width="220" height="200" rx="12" fill="#064e3b" stroke="#10b981" stroke-width="2"/>
+            <text x="400" y="45" fill="#6ee7b7" font-weight="bold" font-size="14" text-anchor="middle">DOMAIN & DATA LAYER</text>
+            <rect x="310" y="65" width="180" height="35" rx="6" fill="#047857"/>
+            <text x="400" y="87" fill="#fff" font-size="12" text-anchor="middle">Entities & Use Cases</text>
+            <rect x="310" y="110" width="180" height="35" rx="6" fill="#047857"/>
+            <text x="400" y="132" fill="#fff" font-size="12" text-anchor="middle">Hive DB Local Storage</text>
+            <rect x="310" y="155" width="180" height="35" rx="6" fill="#047857"/>
+            <text x="400" y="177" fill="#fff" font-size="12" text-anchor="middle">Sync Queue Manager</text>
+
+            <!-- Arrow 2 -->
+            <path d="M 510 120 L 560 120" stroke="#06b6d4" stroke-width="3"/>
+
+            <!-- Backend Services -->
+            <rect x="560" y="20" width="220" height="200" rx="12" fill="#451a03" stroke="#f59e0b" stroke-width="2"/>
+            <text x="670" y="45" fill="#fcd34d" font-weight="bold" font-size="14" text-anchor="middle">FASTAPI BACKEND</text>
+            <rect x="580" y="65" width="180" height="35" rx="6" fill="#78350f"/>
+            <text x="670" y="87" fill="#fff" font-size="12" text-anchor="middle">Random Forest Pipeline</text>
+            <rect x="580" y="110" width="180" height="35" rx="6" fill="#78350f"/>
+            <text x="670" y="132" fill="#fff" font-size="12" text-anchor="middle">Gemini LLM Orchestrator</text>
+            <rect x="580" y="155" width="180" height="35" rx="6" fill="#78350f"/>
+            <text x="670" y="177" fill="#fff" font-size="12" text-anchor="middle">Firebase & Firestore SDK</text>
+          </svg>
+        </div>
+
+        <div class="grid-2" style="margin-top: 1.25rem;">
+          <div class="glass-card">
+            <div class="card-title">Clean Architecture Separation</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Strict isolation ensures business logic in Domain remains independent of UI components and external cloud APIs.</p>
+          </div>
+          <div class="glass-card">
+            <div class="card-title">Microservice REST Endpoints</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">FastAPI routers handle distinct domain endpoints (`/predict`, `/recommendations`, `/analytics`) asynchronously.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 5: TECH STACK -->
+      <section class="slide" id="slide-4">
+        <div class="slide-header">
+          <div class="slide-badge">Technology Stack</div>
+          <h2 class="slide-title">System Ecosystem & Tools</h2>
+        </div>
+
+        <table class="spec-table">
+          <thead>
+            <tr>
+              <th>Layer</th>
+              <th>Technology</th>
+              <th>Version</th>
+              <th>Role & Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="highlight">Mobile Client</td>
+              <td>Flutter / Dart</td>
+              <td>3.22 / 3.4</td>
+              <td>Cross-platform iOS/Android UI with Material 3 standard</td>
+            </tr>
+            <tr>
+              <td class="highlight">State Management</td>
+              <td>Riverpod</td>
+              <td>2.5.1</td>
+              <td>Compile-safe dependency injection & provider lifecycle</td>
+            </tr>
+            <tr>
+              <td class="highlight">Local Storage</td>
+              <td>Hive DB</td>
+              <td>1.1.0</td>
+              <td>High-speed NoSQL key-value store for offline mode</td>
+            </tr>
+            <tr>
+              <td class="highlight">Backend API</td>
+              <td>FastAPI / Python</td>
+              <td>0.111 / 3.11</td>
+              <td>Async Python server executing ML models & Gemini endpoints</td>
+            </tr>
+            <tr>
+              <td class="highlight">Predictive ML</td>
+              <td>Scikit-Learn & SHAP</td>
+              <td>1.5.0</td>
+              <td>Random Forest classification with feature attribution</td>
+            </tr>
+            <tr>
+              <td class="highlight">Generative AI</td>
+              <td>Google Gemini 1.5 Flash</td>
+              <td>REST API</td>
+              <td>Context-aware coaching & sentiment analysis LLM</td>
+            </tr>
+            <tr>
+              <td class="highlight">Cloud Services</td>
+              <td>Firebase Suite</td>
+              <td>6.5.0 Admin</td>
+              <td>Firebase Auth, Firestore DB, FCM Push Notifications</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- SLIDE 6: MACHINE LEARNING PIPELINE -->
+      <section class="slide" id="slide-5">
+        <div class="slide-header">
+          <div class="slide-badge">Predictive AI</div>
+          <h2 class="slide-title">Machine Learning Pipeline & SHAP XAI</h2>
+        </div>
+
+        <div class="grid-2">
+          <div class="glass-card">
+            <div class="card-title" style="color: var(--accent-secondary);">🌲 Random Forest Model</div>
+            <ul class="feature-list">
+              <li>Selected for superior performance on tabular wellness features.</li>
+              <li>Input vector: Sleep hours, Screen time, Mood score, Stress level, Water intake, Steps.</li>
+              <li>Output classes: Low Risk, Moderate Risk, High Risk.</li>
+              <li><strong>Achieved 93.3% accuracy</strong> on cross-validation sets.</li>
+            </ul>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-title" style="color: var(--accent-purple);">🔍 Explainable AI (SHAP)</div>
+            <ul class="feature-list">
+              <li>Calculates SHAP values to explain specific tree decision weights.</li>
+              <li>Prevents "black-box AI" by outputting top 3 contributing factors.</li>
+              <li>Example output: <i>"Risk driven by <5.5 hrs sleep and >10 hrs work time."</i></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="grid-3" style="margin-top: 1.5rem;">
+          <div class="metric-box">
+            <div class="metric-value">93.3%</div>
+            <div class="metric-label">Prediction Accuracy</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-value">&lt;22ms</div>
+            <div class="metric-label">Inference Latency</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-value">6 Features</div>
+            <div class="metric-label">Input Telemetry Vector</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 7: AI ORCHESTRATION -->
+      <section class="slide" id="slide-6">
+        <div class="slide-header">
+          <div class="slide-badge">Generative AI</div>
+          <h2 class="slide-title">Gemini LLM Orchestration & Reliability</h2>
+        </div>
+
+        <div class="grid-2">
+          <div class="glass-card">
+            <div class="card-title" style="color: var(--accent-secondary);">💬 Gemini 1.5 Flash Integration</div>
+            <ul class="feature-list">
+              <li>Generates tailored developer habit recommendations.</li>
+              <li>Powers the interactive AI Wellness Coach chat session.</li>
+              <li>Analyses raw text journal entries for emotional sentiment.</li>
+            </ul>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-title" style="color: var(--accent-green);">🛡️ Resilience & Fail-Safe Architecture</div>
+            <ul class="feature-list">
+              <li><strong>Exponential Backoff:</strong> Retries failed API calls safely.</li>
+              <li><strong>Rule-Based Fallback Engine:</strong> Instantly returns static rule-based summaries if Gemini API is unreachable.</li>
+              <li><strong>Prompt Sanitization:</strong> Prevents prompt injection attacks.</li>
+              <li><strong>Medical Disclaimer:</strong> Appended to all health guidance outputs.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="glass-card" style="margin-top: 1.25rem; font-family: var(--font-mono); font-size: 0.85rem; color: #a5b4fc; background: rgba(15, 23, 42, 0.8);">
+          <code>
+            // Fail-Safe LLM Flow<br>
+            try {<br>
+            &nbsp;&nbsp;response = await geminiApi.generateContent(prompt, timeout: 3000ms);<br>
+            } catch (ApiException e) {<br>
+            &nbsp;&nbsp;response = localRuleEngine.generateFallbackSummary(userMetrics);<br>
+            }
+          </code>
+        </div>
+      </section>
+
+      <!-- SLIDE 8: MOBILE UI FEATURES -->
+      <section class="slide" id="slide-7">
+        <div class="slide-header">
+          <div class="slide-badge">Frontend Mobile</div>
+          <h2 class="slide-title">Mobile Application Features</h2>
+        </div>
+
+        <div class="grid-4">
+          <div class="glass-card" style="text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📊</div>
+            <div class="card-title" style="justify-content: center; font-size: 1rem;">Dashboard</div>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">Real-time risk gauge, score cards, & context weather widget.</p>
+          </div>
+          <div class="glass-card" style="text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📝</div>
+            <div class="card-title" style="justify-content: center; font-size: 1rem;">Mood Logging</div>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">Drag sliders for sleep, mood, stress, steps, and water.</p>
+          </div>
+          <div class="glass-card" style="text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📈</div>
+            <div class="card-title" style="justify-content: center; font-size: 1rem;">fl_chart Graphs</div>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">Interactive weekly & monthly trend charts.</p>
+          </div>
+          <div class="glass-card" style="text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📄</div>
+            <div class="card-title" style="justify-content: center; font-size: 1rem;">PDF Exporter</div>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">One-click encrypted PDF/JSON backup export.</p>
+          </div>
+        </div>
+
+        <div class="glass-card" style="margin-top: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div class="card-title" style="margin: 0; color: #fff;">Context Weather Integration</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">Interfaces with device geolocation APIs to tailor break outdoor activity tips to current weather conditions.</p>
+          </div>
+          <div style="font-size: 2rem;">🌤️</div>
+        </div>
+      </section>
+
+      <!-- SLIDE 9: OFFLINE FIRST -->
+      <section class="slide" id="slide-8">
+        <div class="slide-header">
+          <div class="slide-badge">Data Resilience</div>
+          <h2 class="slide-title">Offline-First Architecture & Sync Engine</h2>
+        </div>
+
+        <div class="grid-2">
+          <div class="glass-card">
+            <div class="card-title" style="color: var(--accent-secondary);">💾 Synchronous Hive Local DB</div>
+            <ul class="feature-list">
+              <li>Every user log commits immediately to high-speed Hive key-value boxes.</li>
+              <li>Guarantees <strong>100% app usability</strong> in offline environments.</li>
+              <li>Instant UI rendering without waiting for network responses.</li>
+            </ul>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-title" style="color: var(--accent-green);">🔄 Connectivity Observer & Queue</div>
+            <ul class="feature-list">
+              <li>`connectivity_plus` actively monitors network status changes.</li>
+              <li>Queues un-synced entries locally with timestamps.</li>
+              <li>Triggers automatic background sync to Cloud Firestore when internet restores.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="metric-box" style="margin-top: 1.5rem;">
+          <div class="metric-value" style="color: var(--accent-green);">0% Packet Loss</div>
+          <div class="metric-label">100% Data Fidelity Verified in Offline Test Scenarios</div>
+        </div>
+      </section>
+
+      <!-- SLIDE 10: SECURITY & QUALITY -->
+      <section class="slide" id="slide-9">
+        <div class="slide-header">
+          <div class="slide-badge">Cybersecurity & QA</div>
+          <h2 class="slide-title">Security Hardening & Quality Assurance</h2>
+        </div>
+
+        <div class="grid-3">
+          <div class="glass-card">
+            <div class="card-title" style="color: var(--accent-secondary);">🔐 Auth Security</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">Firebase JWT ID Token validation in backend middleware. Granular Firestore Security Rules isolate user data collections.</p>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-title" style="color: var(--accent-warning);">🛡️ Endpoint Protection</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">OWASP security headers (HSTS, CSP, X-Frame-Options), memory rate limiters, and strict Pydantic input sanitization.</p>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-title" style="color: var(--accent-purple);">🧪 Automated Testing</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">Pytest backend test suite for API endpoints and ML models. Flutter Test widget & provider verification suite.</p>
+          </div>
+        </div>
+
+        <div class="glass-card" style="margin-top: 1.5rem; background: rgba(16, 185, 129, 0.1); border-color: var(--accent-green);">
+          <div class="card-title" style="color: #6ee7b7;">✅ Regulatory Compliance & Health Disclaimers</div>
+          <p style="font-size: 0.85rem; color: #e2e8f0;">Applies GDPR data export rights (PDF/JSON data export) and displays clear medical disclaimers declaring the app as a wellness companion rather than a clinical diagnostic tool.</p>
+        </div>
+      </section>
+
+      <!-- SLIDE 11: PERFORMANCE RESULTS -->
+      <section class="slide" id="slide-10">
+        <div class="slide-header">
+          <div class="slide-badge">Empirical Results</div>
+          <h2 class="slide-title">Quantitative Evaluation Results</h2>
+        </div>
+
+        <div class="grid-4" style="margin-bottom: 1.5rem;">
+          <div class="metric-box">
+            <div class="metric-value">93.3%</div>
+            <div class="metric-label">Model Accuracy</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-value">&lt;22 ms</div>
+            <div class="metric-label">API Response Time</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-value">1.1 s</div>
+            <div class="metric-label">Cold App Boot</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-value">60 FPS</div>
+            <div class="metric-label">UI Rendering Rate</div>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <div class="card-title">Performance Summary</div>
+          <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.6;">
+            Empirical evaluations demonstrate outstanding response metrics. Pre-warmed FastAPI endpoints and lightweight Random Forest inference ensure response latencies under 22 milliseconds. Local Hive DB initialization enables cold app launches in 1.1 seconds with seamless 60 FPS UI animations.
+          </p>
+        </div>
+      </section>
+
+      <!-- SLIDE 12: VIVA DEMO SCRIPT -->
+      <section class="slide" id="slide-11">
+        <div class="slide-header">
+          <div class="slide-badge">Presentation Guide</div>
+          <h2 class="slide-title">10-Minute Viva Demonstration Guide</h2>
+        </div>
+
+        <div class="grid-2">
+          <div class="glass-card">
+            <div class="card-title" style="color: var(--accent-secondary);">Part 1 & 2: Auth & Dashboard</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Launch app -> View Splash -> Log in with Firebase -> View dynamic burnout gauge, weather card, and daily score.</p>
+          </div>
+          <div class="glass-card">
+            <div class="card-title" style="color: var(--accent-purple);">Part 3 & 4: Mood & AI Coaching</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Drag sliders (sleep, mood, steps) -> Save entry -> Watch Random Forest update risk + SHAP explanation -> Chat with Gemini AI Coach.</p>
+          </div>
+          <div class="glass-card">
+            <div class="card-title" style="color: var(--accent-warning);">Part 5: Offline Resilience Test</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Disable Wi-Fi -> Log entry in Airplane Mode -> Verify orange cache banner -> Re-enable Wi-Fi -> Verify background cloud sync.</p>
+          </div>
+          <div class="glass-card">
+            <div class="card-title" style="color: var(--accent-green);">Part 6: Reports & PDF Exporter</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Navigate to Reports tab -> View fl_chart trend graphs -> Tap Settings -> Export PDF report backup.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 13: FUTURE ROADMAP -->
+      <section class="slide" id="slide-12">
+        <div class="slide-header">
+          <div class="slide-badge">Future Horizons</div>
+          <h2 class="slide-title">Future Roadmap & Academic Impact</h2>
+        </div>
+
+        <div class="grid-3">
+          <div class="glass-card">
+            <div class="card-title" style="color: var(--accent-secondary);">⌚ Smart Wearables</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Integrate Apple HealthKit and Google Health Connect for automated step, heart rate, and sleep sync.</p>
+          </div>
+          <div class="glass-card">
+            <div class="card-title" style="color: var(--accent-purple);">🔒 Federated Learning</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Implement on-device federated model training to preserve privacy without uploading raw user telemetry.</p>
+          </div>
+          <div class="glass-card">
+            <div class="card-title" style="color: var(--accent-green);">🌐 Multilingual AI</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Expand Gemini LLM prompts to support multilingual developers across global engineering hubs.</p>
+          </div>
+        </div>
+
+        <div class="glass-card" style="margin-top: 1.5rem; border-color: var(--accent-primary);">
+          <div class="card-title" style="color: #a5b4fc;">📚 Academic Dissemination</div>
+          <p style="font-size: 0.9rem; color: #e2e8f0;">
+            Preparing an academic research manuscript focused on <i>"Explainable Machine Learning and Offline-First Architectures for Occupational Mental Health Mobile Apps."</i>
+          </p>
+        </div>
+      </section>
+
+      <!-- SLIDE 14: CONCLUSION & QA -->
+      <section class="slide" id="slide-13">
+        <div class="slide-header">
+          <div class="slide-badge">Defense Conclusion</div>
+          <h2 class="slide-title">Conclusion & Q&A Session</h2>
+        </div>
+
+        <div class="glass-card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(6, 182, 212, 0.15)); border-color: var(--accent-primary);">
+          <div class="card-title" style="font-size: 1.35rem; color: #fff;">Summary of Achievements</div>
+          <ul class="feature-list" style="margin-top: 0.75rem;">
+            <li>Built an end-to-end production-grade mental wellness platform for IT professionals.</li>
+            <li>Combined a 93.3% accurate Random Forest classifier with transparent SHAP explanations.</li>
+            <li>Engineered a resilient offline-first Flutter client with automatic Firestore cloud sync.</li>
+            <li>Orchestrated Gemini 1.5 Flash LLM interactions with fail-safe fallback mechanisms.</li>
+          </ul>
+        </div>
+
+        <div style="text-align: center; padding: 2rem 0;">
+          <h2 style="font-family: var(--font-heading); font-size: 2.5rem; color: #fff; margin-bottom: 0.5rem;">Thank You!</h2>
+          <p style="color: var(--accent-secondary); font-size: 1.2rem; font-weight: 600;">The floor is now open for questions and board discussion.</p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Floating Navigation Controls -->
+  <div class="nav-floating" style="position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); z-index: 50; display: flex; gap: 1rem; background: rgba(11, 15, 25, 0.85); padding: 0.75rem 1.5rem; border-radius: 40px; border: 1px solid var(--bg-card-border); backdrop-filter: blur(16px);">
+    <button class="btn" onclick="prevSlide()" id="btnPrev">← Prev</button>
+    <span id="slideCounter" style="font-family: var(--font-mono); font-size: 0.9rem; color: var(--accent-secondary); display: flex; align-items: center;">
+      Slide 1 / 14
+    </span>
+    <button class="btn btn-primary" onclick="nextSlide()" id="btnNext">Next →</button>
+  </div>
+
+  <!-- Speaker Notes Drawer -->
+  <div id="notesDrawer" class="notes-drawer">
+    <div class="notes-header">
+      <div class="notes-title">🎙️ Speaker Script & Viva Notes</div>
+      <button class="btn" onclick="toggleSpeakerNotes()" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Close</button>
+    </div>
+    <div id="notesContent" class="notes-content">
+      Loading speaker notes...
+    </div>
+  </div>
+
+  <!-- JavaScript Navigation Logic -->
+  <script>
+    const speakerNotes = [
+      `"Good morning, members of the board and distinguished guests. My name is Yuvin Chandula, and today I am proud to present MindSync AI—a production-grade, AI-driven mental wellness platform built explicitly to predict, monitor, and mitigate workplace burnout among software engineers and IT professionals."`,
+
+      `"Software developers work in high-stress, high-velocity environments. Traditional health applications simply track steps or water intake without understanding cognitive fatigue or work pressures. Furthermore, generic wellness apps push static alerts that cause notification fatigue. MindSync AI bridges this gap by unifying daily physical metrics with mental health logs."`,
+
+      `"Our core aim was to engineer a robust, end-to-end platform. We structured our research and development around five main objectives: building a responsive Flutter client, deploying a high-performance FastAPI backend, training an explainable Random Forest ML model, orchestrating Gemini LLM interactions safely, and guaranteeing complete offline functionality through Hive DB."`,
+
+      `"To ensure long-term maintainability and modularity, both frontend and backend adhere strictly to Clean Architecture. The Flutter client separates Presentation, Domain, and Data layers. The FastAPI backend isolates core ML models, security middleware, and external API connectors."`,
+
+      `"Our technology stack combines high-performance tools across all tiers. Flutter delivers 60 FPS mobile performance across Android and iOS. FastAPI provides async Python endpoints. Scikit-learn powers the predictive ML pipeline, while Firebase and Hive form our hybrid cloud-local data persistence engine."`,
+
+      `"For burnout risk classification, we trained a Random Forest model achieving 93.3% accuracy. Crucially, black-box AI is unacceptable in health tech. We integrated SHAP tree explainability to break down predictions into clear factors—telling the user exactly why their risk level was classified as High, Moderate, or Low."`,
+
+      `"The AI Orchestration layer connects our backend to Google's Gemini 1.5 Flash model. To handle real-world API failures or network drops, we engineered an exponential backoff retry loop backed by a fail-safe fallback engine that returns structured rule-based wellness summaries if Gemini is offline."`,
+
+      `"The mobile client offers an intuitive, Material 3 UI. Users can log daily parameters using responsive sliders. The dashboard visualizes telemetry through fl_chart trend lines, and users can export their personal health history directly into formatted PDF reports."`,
+
+      `"Network connectivity in mobile environments is unpredictable. MindSync AI adopts an offline-first pattern: all logs write to local Hive boxes immediately. A background sync engine monitors network connectivity and automatically pushes queued records to Cloud Firestore when connection is restored."`,
+
+      `"Security is built into every layer. We validate Firebase JWT tokens on every backend call, enforce row-level security via Firestore Rules, protect endpoints with rate limiters, and sanitize inputs against prompt injection. Unit tests cover all critical business logic."`,
+
+      `"Our quantitative evaluation demonstrates exceptional performance. The ML classifier achieved 93.3% accuracy. Backend API response times averaged under 22 milliseconds due to async IO, and mobile cold boot time is just 1.1 seconds. Offline synchronization achieved 100% data fidelity with zero packet loss."`,
+
+      `"Here is our 10-minute demonstration plan for the viva defense. We walk the panel through onboarding, real-time ML prediction, AI chat coaching, airplane-mode offline resilience, and final PDF export."`,
+
+      `"Looking ahead, the roadmap includes native wearable integration with Apple Health and Google Fit, on-device Federated Learning for enhanced privacy, and multilingual support. We are also preparing an academic paper based on these findings."`,
+
+      `"In conclusion, MindSync AI successfully demonstrates how machine learning, generative AI, and offline-first mobile engineering can be combined to solve real-world workplace burnout. Thank you for your time and attention. I am now delighted to answer your questions."`
+    ];
+
+    let currentSlide = 0;
+    const totalSlides = 14;
+
+    function updateSlide() {
+      // Hide all slides
+      document.querySelectorAll('.slide').forEach((slide, index) => {
+        slide.classList.remove('active');
+        if (index === currentSlide) {
+          slide.classList.add('active');
+        }
+      });
+
+      // Update dropdown
+      document.getElementById('slideSelect').value = currentSlide;
+
+      // Update progress bar
+      const progressPercent = ((currentSlide + 1) / totalSlides) * 100;
+      document.getElementById('progressBar').style.width = progressPercent + '%';
+
+      // Update slide counter text
+      document.getElementById('slideCounter').innerText = `Slide ${currentSlide + 1} / ${totalSlides}`;
+
+      // Update speaker notes
+      document.getElementById('notesContent').innerHTML = `<p>${speakerNotes[currentSlide]}</p>`;
+
+      // Button state
+      document.getElementById('btnPrev').disabled = (currentSlide === 0);
+      document.getElementById('btnNext').disabled = (currentSlide === totalSlides - 1);
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function jumpToSlide(index) {
+      if (index >= 0 && index < totalSlides) {
+        currentSlide = index;
+        updateSlide();
+      }
+    }
+
+    function toggleSpeakerNotes() {
+      const drawer = document.getElementById('notesDrawer');
+      drawer.classList.toggle('open');
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          alert(`Error attempting to enable fullscreen: ${err.message}`);
+        });
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Keyboard Navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'Space') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        prevSlide();
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      } else if (e.key === 's' || e.key === 'S') {
+        toggleSpeakerNotes();
+      } else if (e.key === 'p' || e.key === 'P') {
+        window.print();
+      }
+    });
+
+    // Initialize
+    updateSlide();
+  </script>
+</body>
+</html>

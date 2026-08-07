@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../authentication/presentation/providers/auth_provider.dart';
+import '../../../notifications/presentation/providers/notification_providers.dart';
 
 class WelcomeHeader extends ConsumerWidget {
   const WelcomeHeader({super.key});
@@ -12,6 +13,7 @@ class WelcomeHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
+    final int unreadCount = ref.watch(unreadNotificationsCountProvider);
     final String fullName = authState is AuthSuccess ? authState.user.fullName : 'Guest Professional';
     final String firstName = fullName.trim().split(' ').first;
 
@@ -114,15 +116,14 @@ class WelcomeHeader extends ConsumerWidget {
                 label: 'Notifications',
                 button: true,
                 child: IconButton(
-                  icon: const Badge(
-                    label: Text('2'),
-                    child: Icon(Icons.notifications_none_outlined),
-                  ),
+                  icon: unreadCount > 0
+                      ? Badge(
+                          label: Text(unreadCount.toString()),
+                          child: const Icon(Icons.notifications_outlined),
+                        )
+                      : const Icon(Icons.notifications_none_outlined),
                   onPressed: () {
-                    // Placeholder notification action
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('No new wellness notifications.')),
-                    );
+                    context.push(AppRouter.notifications);
                   },
                 ),
               ),

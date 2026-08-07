@@ -8,6 +8,8 @@ import '../../domain/entities/dashboard_data.dart';
 import '../../domain/entities/weather_info.dart';
 import '../../domain/repositories/dashboard_repository.dart';
 import '../../../authentication/presentation/providers/auth_provider.dart';
+import '../../../mood/data/datasources/mood_local_datasource.dart';
+import '../../../mood/presentation/providers/mood_providers.dart';
 
 // Repositories & Data Sources Providers
 final Provider<DashboardLocalDataSource> dashboardLocalDataSourceProvider =
@@ -24,7 +26,12 @@ final Provider<DashboardRepository> dashboardRepositoryProvider =
     Provider<DashboardRepository>((Ref ref) {
   final DashboardRemoteDataSource remote = ref.watch(dashboardRemoteDataSourceProvider);
   final DashboardLocalDataSource local = ref.watch(dashboardLocalDataSourceProvider);
-  return DashboardRepositoryImpl(remoteDataSource: remote, localDataSource: local);
+  final MoodLocalDataSource moodLocal = ref.watch(moodLocalDataSourceProvider);
+  return DashboardRepositoryImpl(
+    remoteDataSource: remote,
+    localDataSource: local,
+    moodLocalDataSource: moodLocal,
+  );
 });
 
 // Dashboard Data State Provider

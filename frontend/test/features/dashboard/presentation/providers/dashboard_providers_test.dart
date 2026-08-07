@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mindsync_ai/core/demo/demo_auth_datasource.dart';
+import 'package:mindsync_ai/core/demo/demo_user.dart';
+import 'package:mindsync_ai/features/authentication/presentation/providers/auth_provider.dart';
 import 'package:mindsync_ai/features/dashboard/domain/entities/activity_summary.dart';
 import 'package:mindsync_ai/features/dashboard/domain/entities/dashboard_data.dart';
 import 'package:mindsync_ai/features/dashboard/domain/entities/weather_info.dart';
@@ -18,6 +21,7 @@ void main() {
     container = ProviderContainer(
       overrides: <Override>[
         dashboardRepositoryProvider.overrideWithValue(mockRepository),
+        firebaseAuthDataSourceProvider.overrideWithValue(DemoAuthDataSource()),
       ],
     );
   });

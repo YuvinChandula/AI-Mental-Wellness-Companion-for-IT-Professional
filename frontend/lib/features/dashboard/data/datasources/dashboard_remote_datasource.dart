@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../../../../core/demo/demo_user.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../domain/entities/activity_summary.dart';
 import '../../domain/entities/dashboard_data.dart';
@@ -71,10 +72,30 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
 
   @override
   Future<DashboardData> getDashboardData(String userId) async {
-    // Simulating API call for wellness data
     await Future<void>.delayed(const Duration(milliseconds: 800));
     
-    // We generate highly interactive and detailed mock data matching the requirements
+    final bool isDemoUser = userId == DemoUser.uid || userId == 'demo-user-001' || userId == 'demo_user';
+    if (!isDemoUser) {
+      return const DashboardData(
+        wellnessScore: 0,
+        wellnessExplanation: 'Welcome! Log your daily mood and activity metrics to track your wellness score.',
+        moodEmoji: '🙂',
+        moodTrend: 'New User',
+        lastMoodEntry: 'No entries yet',
+        burnoutRiskLevel: 'Low',
+        burnoutPercentage: 0.0,
+        recommendationText: 'Log your first daily check-in to generate personalized AI recommendations.',
+        recommendationCategory: 'Getting Started',
+        quoteText: 'The secret of getting ahead is getting started.',
+        quoteAuthor: 'Mark Twain',
+        recentMoods: <Map<String, dynamic>>[],
+        weeklyMoods: <double>[0, 0, 0, 0, 0, 0, 0],
+        weeklySleepHours: <double>[0, 0, 0, 0, 0, 0, 0],
+        weeklyWaterIntake: <double>[0, 0, 0, 0, 0, 0, 0],
+        weeklyExercise: <double>[0, 0, 0, 0, 0, 0, 0],
+      );
+    }
+
     return const DashboardData(
       wellnessScore: 82,
       wellnessExplanation: 'Your sleep and activity levels are excellent today, but you logged a slightly lower mood this morning. Consider taking a quick walk.',
@@ -101,8 +122,21 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
 
   @override
   Future<ActivitySummary> getActivitySummary(String userId) async {
-    // Simulating API call for activities
     await Future<void>.delayed(const Duration(milliseconds: 600));
+
+    final bool isDemoUser = userId == DemoUser.uid || userId == 'demo-user-001' || userId == 'demo_user';
+    if (!isDemoUser) {
+      return const ActivitySummary(
+        steps: 0,
+        stepsGoal: 10000,
+        waterIntakeMl: 0,
+        waterIntakeGoal: 2500,
+        sleepHours: 0.0,
+        sleepHoursGoal: 8.0,
+        exerciseMinutes: 0,
+        exerciseMinutesGoal: 45,
+      );
+    }
 
     return const ActivitySummary(
       steps: 6420,

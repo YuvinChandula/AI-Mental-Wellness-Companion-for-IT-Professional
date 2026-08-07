@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mindsync_ai/core/demo/demo_auth_datasource.dart';
+import 'package:mindsync_ai/features/authentication/presentation/providers/auth_provider.dart';
 import 'package:mindsync_ai/features/mood/domain/entities/mood_log.dart';
 import 'package:mindsync_ai/features/mood/domain/repositories/mood_repository.dart';
 import 'package:mindsync_ai/features/mood/presentation/providers/mood_providers.dart';
@@ -15,6 +17,7 @@ void main() {
     mockRepository = MockMoodRepository();
     container = ProviderContainer(
       overrides: <Override>[
+        firebaseAuthDataSourceProvider.overrideWithValue(DemoAuthDataSource()),
         moodRepositoryProvider.overrideWithValue(mockRepository),
       ],
     );

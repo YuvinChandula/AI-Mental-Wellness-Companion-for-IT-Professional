@@ -101,14 +101,14 @@ class _WeeklyWellnessChartsState extends State<WeeklyWellnessCharts> with Single
   Widget _buildMoodChart() {
     final values = widget.weeklyMoods.isNotEmpty
         ? widget.weeklyMoods
-        : <double>[4.0, 3.5, 4.5, 3.0, 4.0, 3.8, 4.2];
+        : <double>[0, 0, 0, 0, 0, 0, 0];
 
     return LineChart(
       LineChartData(
         gridData: const FlGridData(show: false),
         titlesData: _buildTitlesData(),
         borderData: FlBorderData(show: false),
-        minY: 1.0,
+        minY: 0.0,
         maxY: 5.0,
         lineBarsData: <LineChartBarData>[
           LineChartBarData(
@@ -156,7 +156,7 @@ class _WeeklyWellnessChartsState extends State<WeeklyWellnessCharts> with Single
   Widget _buildSleepChart() {
     final values = widget.weeklySleepHours.isNotEmpty
         ? widget.weeklySleepHours
-        : <double>[7.0, 6.5, 8.0, 7.5, 6.0, 8.5, 7.8];
+        : <double>[0, 0, 0, 0, 0, 0, 0];
 
     return LineChart(
       LineChartData(
@@ -211,7 +211,7 @@ class _WeeklyWellnessChartsState extends State<WeeklyWellnessCharts> with Single
   Widget _buildWaterChart() {
     final values = widget.weeklyWaterIntake.isNotEmpty
         ? widget.weeklyWaterIntake
-        : <double>[2.0, 1.5, 2.5, 1.8, 2.2, 2.0, 1.9];
+        : <double>[0, 0, 0, 0, 0, 0, 0];
 
     return BarChart(
       BarChartData(
@@ -253,7 +253,7 @@ class _WeeklyWellnessChartsState extends State<WeeklyWellnessCharts> with Single
   Widget _buildActivityChart() {
     final values = widget.weeklyExercise.isNotEmpty
         ? widget.weeklyExercise
-        : <double>[30, 20, 45, 15, 60, 25, 40];
+        : <double>[0, 0, 0, 0, 0, 0, 0];
 
     return BarChart(
       BarChartData(

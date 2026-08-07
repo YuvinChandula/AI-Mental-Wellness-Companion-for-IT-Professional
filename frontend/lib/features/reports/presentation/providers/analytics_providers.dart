@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mindsync_ai/core/config/app_config.dart';
 import 'package:mindsync_ai/core/demo/demo_analytics_repository.dart';
+import 'package:mindsync_ai/features/mood/presentation/providers/mood_providers.dart';
 import 'package:mindsync_ai/shared/providers/shared_providers.dart';
 import '../../domain/entities/analytics_summary.dart';
 import '../../domain/entities/trend_data.dart';
@@ -14,7 +15,8 @@ final Provider<AnalyticsRepository> analyticsRepositoryProvider = Provider<Analy
     return DemoAnalyticsRepository();
   }
   final dioClient = ref.watch(dioClientProvider);
-  return AnalyticsRepositoryImpl(dio: dioClient.dio);
+  final moodLocal = ref.watch(moodLocalDataSourceProvider);
+  return AnalyticsRepositoryImpl(dio: dioClient.dio, moodLocalDataSource: moodLocal);
 });
 
 // Date Filters: today, last_7_days, last_30_days, last_90_days, custom
@@ -35,6 +37,7 @@ final AutoDisposeFutureProvider<AnalyticsSummary> analyticsSummaryStateProvider 
     filterType: filter,
     startDate: range?.start.toIso8601String(),
     endDate: range?.end.toIso8601String(),
+    forceRefresh: true,
   );
 });
 
@@ -51,6 +54,7 @@ final AutoDisposeFutureProvider<List<TrendData>> trendDataStateProvider = Future
     filterType: filter,
     startDate: range?.start.toIso8601String(),
     endDate: range?.end.toIso8601String(),
+    forceRefresh: true,
   );
 });
 

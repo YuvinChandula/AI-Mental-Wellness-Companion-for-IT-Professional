@@ -26,10 +26,12 @@ class DemoAuthDataSource implements FirebaseAuthDataSource {
 
   @override
   Future<UserModel?> register(String fullName, String email, String password) async {
+    final String cleanEmail = email.trim().toLowerCase();
+    final String uid = 'user_${cleanEmail.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_')}';
     _currentUser = UserModel(
-      uid: DemoUser.uid,
+      uid: uid,
       fullName: fullName,
-      email: email,
+      email: cleanEmail,
       isVerified: true,
       onboardingCompleted: true,
       createdAt: DateTime.now(),
@@ -40,7 +42,27 @@ class DemoAuthDataSource implements FirebaseAuthDataSource {
 
   @override
   Future<UserModel?> signIn(String email, String password) async {
-    _currentUser = DemoUser.model;
+    final String cleanEmail = email.trim().toLowerCase();
+    if (cleanEmail == 'demo@mindsync.ai' || cleanEmail == 'demo') {
+      _currentUser = DemoUser.model;
+      return _currentUser;
+    }
+
+    final String uid = 'user_${cleanEmail.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_')}';
+    final String namePart = cleanEmail.split('@').first;
+    final String name = namePart.isNotEmpty
+        ? namePart[0].toUpperCase() + namePart.substring(1)
+        : 'User';
+
+    _currentUser = UserModel(
+      uid: uid,
+      fullName: name,
+      email: cleanEmail,
+      isVerified: true,
+      onboardingCompleted: true,
+      createdAt: DateTime.now(),
+      lastLogin: DateTime.now(),
+    );
     return _currentUser;
   }
 
