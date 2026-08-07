@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/config/app_config.dart';
 import '../../../../core/demo/demo_profile_repository.dart';
 import '../../../../core/demo/demo_storage_repository.dart';
+import '../../../authentication/presentation/providers/auth_provider.dart';
 import '../../domain/entities/user_profile.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../../data/repositories/profile_repository_impl.dart';
@@ -11,9 +12,9 @@ import '../../data/repositories/storage_repository_impl.dart';
 
 final Provider<ProfileRepository> profileRepositoryProvider = Provider<ProfileRepository>((Ref ref) {
   if (AppConfig.demoMode) {
-    return DemoProfileRepository();
+    return DemoProfileRepository(ref);
   }
-  return ProfileRepositoryImpl();
+  return ProfileRepositoryImpl(ref: ref);
 });
 
 final Provider<StorageRepository> storageRepositoryProvider = Provider<StorageRepository>((Ref ref) {
@@ -27,16 +28,33 @@ final Provider<StorageRepository> storageRepositoryProvider = Provider<StorageRe
 class ProfileStateNotifier extends StateNotifier<AsyncValue<UserProfile>> {
   final ProfileRepository _repository;
   final StorageRepository _storageRepository;
+  final Ref _ref;
 
-  ProfileStateNotifier(this._repository, this._storageRepository) : super(const AsyncValue<UserProfile>.loading()) {
+  ProfileStateNotifier(this._repository, this._storageRepository, this._ref)
+      : super(const AsyncValue<UserProfile>.loading()) {
     loadProfile();
+    _ref.listen<AuthState>(authStateProvider, (AuthState? previous, AuthState next) {
+      if (next is AuthSuccess || next is AuthInitial) {
+        loadProfile();
+      }
+    });
   }
 
   Future<void> loadProfile() async {
     state = const AsyncValue<UserProfile>.loading();
     try {
+      final authState = _ref.read(authStateProvider);
       final UserProfile profile = await _repository.getProfile();
-      state = AsyncValue<UserProfile>.data(profile);
+      if (authState is AuthSuccess) {
+        final UserProfile synced = profile.copyWith(
+          uid: authState.user.uid,
+          fullName: authState.user.fullName,
+          email: authState.user.email,
+        );
+        state = AsyncValue<UserProfile>.data(synced);
+      } else {
+        state = AsyncValue<UserProfile>.data(profile);
+      }
     } catch (e, stack) {
       state = AsyncValue<UserProfile>.error(e, stack);
     }
@@ -80,5 +98,5 @@ final StateNotifierProvider<ProfileStateNotifier, AsyncValue<UserProfile>> profi
     StateNotifierProvider<ProfileStateNotifier, AsyncValue<UserProfile>>((Ref ref) {
   final ProfileRepository repo = ref.watch(profileRepositoryProvider);
   final StorageRepository storage = ref.watch(storageRepositoryProvider);
-  return ProfileStateNotifier(repo, storage);
+  return ProfileStateNotifier(repo, storage, ref);
 });

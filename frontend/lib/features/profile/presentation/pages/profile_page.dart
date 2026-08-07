@@ -95,6 +95,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AsyncValue<UserProfile>>(profileStateProvider, (AsyncValue<UserProfile>? previous, AsyncValue<UserProfile> next) {
+      next.whenData((UserProfile profile) {
+        if (!_isEditing) {
+          _populateFields(profile);
+        }
+      });
+    });
+
     final AsyncValue<UserProfile> state = ref.watch(profileStateProvider);
     final theme = Theme.of(context);
 
@@ -143,7 +151,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       ),
       body: state.when(
         data: (UserProfile profile) {
-          if (!_isEditing) {
+          if (!_isEditing && (_nameController.text.isEmpty || _nameController.text != profile.fullName)) {
             _populateFields(profile);
           }
 
@@ -211,13 +219,23 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                if (profile.occupation != null && profile.occupation!.isNotEmpty)
+                const SizedBox(height: 2),
+                Text(
+                  profile.email,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (profile.occupation != null && profile.occupation!.isNotEmpty) ...<Widget>[
+                  const SizedBox(height: 2),
                   Text(
                     profile.occupation!,
-                    style: theme.textTheme.bodyMedium?.copyWith(
+                    style: theme.textTheme.bodySmall?.copyWith(
                       color: Colors.grey.shade600,
                     ),
                   ),
+                ],
                 const SizedBox(height: 24),
 
                 // Form details

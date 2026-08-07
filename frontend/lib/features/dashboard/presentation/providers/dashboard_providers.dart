@@ -41,6 +41,11 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardData>> {
 
   DashboardNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
     loadDashboard();
+    _ref.listen<AuthState>(authStateProvider, (AuthState? previous, AuthState next) {
+      if (next is AuthSuccess || next is AuthInitial) {
+        loadDashboard(forceRefresh: true);
+      }
+    });
   }
 
   Future<void> loadDashboard({bool forceRefresh = false}) async {
@@ -80,6 +85,11 @@ class ActivityNotifier extends StateNotifier<AsyncValue<ActivitySummary>> {
 
   ActivityNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
     loadActivities();
+    _ref.listen<AuthState>(authStateProvider, (AuthState? previous, AuthState next) {
+      if (next is AuthSuccess || next is AuthInitial) {
+        loadActivities();
+      }
+    });
   }
 
   Future<void> loadActivities() async {

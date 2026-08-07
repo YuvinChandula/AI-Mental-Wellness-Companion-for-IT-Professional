@@ -6,6 +6,7 @@ import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../authentication/presentation/providers/auth_provider.dart';
 import '../../../notifications/presentation/providers/notification_providers.dart';
+import '../../../profile/presentation/providers/profile_providers.dart';
 
 class WelcomeHeader extends ConsumerWidget {
   const WelcomeHeader({super.key});
@@ -13,8 +14,15 @@ class WelcomeHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
+    final profileState = ref.watch(profileStateProvider);
     final int unreadCount = ref.watch(unreadNotificationsCountProvider);
-    final String fullName = authState is AuthSuccess ? authState.user.fullName : 'Guest Professional';
+
+    String fullName = authState is AuthSuccess ? authState.user.fullName : 'Guest Professional';
+    profileState.whenData((profile) {
+      if (profile.fullName.isNotEmpty) {
+        fullName = profile.fullName;
+      }
+    });
     final String firstName = fullName.trim().split(' ').first;
 
     // Time-based greeting
