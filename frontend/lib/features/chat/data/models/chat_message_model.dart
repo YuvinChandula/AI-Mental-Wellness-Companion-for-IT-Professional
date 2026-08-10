@@ -53,9 +53,10 @@ class ChatMessageModel extends ChatMessage {
     };
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toFirestore([String? userId]) {
     return <String, dynamic>{
       'sessionId': sessionId,
+      if (userId != null && userId.isNotEmpty) 'userId': userId,
       'sender': sender,
       'message': message,
       'createdAt': Timestamp.fromDate(createdAt),

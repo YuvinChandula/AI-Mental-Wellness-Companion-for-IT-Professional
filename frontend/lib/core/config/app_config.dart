@@ -7,6 +7,7 @@ class AppConfig {
   static const bool demoMode = false;
 
   static String get backendUrl => dotenv.env['BACKEND_URL'] ?? 'http://10.0.2.2:8000';
+  static String get groqApiKey => dotenv.env['GROQ_API_KEY'] ?? dotenv.env['GEMINI_API_KEY'] ?? '';
   static String get geminiApiKey => dotenv.env['GEMINI_API_KEY'] ?? '';
   static String get openWeatherApiKey => dotenv.env['OPENWEATHER_API_KEY'] ?? '';
 

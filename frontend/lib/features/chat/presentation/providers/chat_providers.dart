@@ -41,6 +41,14 @@ class ChatSessionsNotifier extends StateNotifier<AsyncValue<List<ChatSession>>> 
   final Ref _ref;
 
   ChatSessionsNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
+    _ref.listen<AuthState>(authStateProvider, (AuthState? previous, AuthState next) {
+      if (next is AuthSuccess) {
+        loadSessions();
+      } else {
+        state = const AsyncValue.data(<ChatSession>[]);
+        _ref.read(activeSessionIdProvider.notifier).state = null;
+      }
+    });
     loadSessions();
   }
 
@@ -110,6 +118,14 @@ class ChatMessagesNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> 
   String? _currentSessionId;
 
   ChatMessagesNotifier(this._repository, this._ref) : super(const AsyncValue.data(<ChatMessage>[])) {
+    // Listen to AuthState changes to reset chat state when logging out or switching users
+    _ref.listen<AuthState>(authStateProvider, (AuthState? previous, AuthState next) {
+      if (next is! AuthSuccess) {
+        _currentSessionId = null;
+        state = const AsyncValue.data(<ChatMessage>[]);
+      }
+    });
+
     // Dynamically query database whenever activeSessionId changes
     _ref.listen<String?>(activeSessionIdProvider, (String? prev, String? next) {
       if (next != _currentSessionId) {
@@ -126,8 +142,27 @@ class ChatMessagesNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> 
       return;
     }
 
+    final authState = _ref.read(authStateProvider);
+    if (authState is! AuthSuccess) {
+      state = const AsyncValue.data(<ChatMessage>[]);
+      return;
+    }
+    final userId = authState.user.uid;
+
     state = const AsyncValue.loading();
     try {
+      // Verify session ownership to ensure user A cannot view user B's sessions
+      final sessions = await _repository.getSessions(userId);
+      final ownsSession = sessions.any((s) => s.sessionId == sessionId);
+      if (!ownsSession) {
+        if (mounted) {
+          _currentSessionId = null;
+          _ref.read(activeSessionIdProvider.notifier).state = null;
+          state = const AsyncValue.data(<ChatMessage>[]);
+        }
+        return;
+      }
+
       final messages = await _repository.getMessages(sessionId);
       if (mounted) {
         state = AsyncValue.data(messages);
@@ -143,6 +178,7 @@ class ChatMessagesNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> 
     String? sessionId = _currentSessionId;
     final authState = _ref.read(authStateProvider);
     if (authState is! AuthSuccess) return;
+    final userId = authState.user.uid;
     
     // Create new session if no active session exists
     if (sessionId == null) {
@@ -172,6 +208,7 @@ class ChatMessagesNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> 
         sessionId,
         userMessage,
         userContext: userContext,
+        userId: userId,
       );
       if (mounted) {
         final list = state.value ?? <ChatMessage>[];

@@ -44,7 +44,7 @@ class DemoChatRemoteDataSource implements ChatRemoteDataSource {
   }
 
   @override
-  Future<String> getGeminiResponse(
+  Future<String> getGroqResponse(
     String prompt,
     List<ChatMessageModel> history, {
     String? userContext,
@@ -54,7 +54,7 @@ class DemoChatRemoteDataSource implements ChatRemoteDataSource {
   }
 
   @override
-  Future<List<ChatMessageModel>> getMessages(String sessionId) async {
+  Future<List<ChatMessageModel>> getMessages(String sessionId, {String? userId}) async {
     await Future<void>.delayed(const Duration(milliseconds: 300));
     return List<ChatMessageModel>.from(_messages[sessionId] ?? <ChatMessageModel>[]);
   }
@@ -62,9 +62,29 @@ class DemoChatRemoteDataSource implements ChatRemoteDataSource {
   @override
   Future<List<ChatSessionModel>> getSessions(String userId) async {
     await Future<void>.delayed(const Duration(milliseconds: 300));
+    final String userSessionId = 'demo-session-$userId';
+    if (!_messages.containsKey(userSessionId)) {
+      _messages[userSessionId] = <ChatMessageModel>[
+        ChatMessageModel(
+          messageId: 'demo-msg-1-$userId',
+          sessionId: userSessionId,
+          sender: 'user',
+          message: 'I feel stressed before a production release.',
+          createdAt: DateTime.now().subtract(const Duration(minutes: 12)),
+        ),
+        ChatMessageModel(
+          messageId: 'demo-msg-2-$userId',
+          sessionId: userSessionId,
+          sender: 'assistant',
+          message:
+              'That is common before launches. Try a 5-minute breathing break and list only the top 3 risks you can control today.',
+          createdAt: DateTime.now().subtract(const Duration(minutes: 11)),
+        ),
+      ];
+    }
     return <ChatSessionModel>[
       ChatSessionModel(
-        sessionId: 'demo-session-1',
+        sessionId: userSessionId,
         userId: userId,
         title: 'Release stress check-in',
         createdAt: DateTime.now().subtract(const Duration(days: 1)),
@@ -77,7 +97,7 @@ class DemoChatRemoteDataSource implements ChatRemoteDataSource {
   Future<void> renameSession(String sessionId, String newTitle) async {}
 
   @override
-  Future<void> saveMessage(ChatMessageModel message) async {
+  Future<void> saveMessage(ChatMessageModel message, {String? userId}) async {
     final List<ChatMessageModel> sessionMessages =
         _messages.putIfAbsent(message.sessionId, () => <ChatMessageModel>[]);
     sessionMessages.add(message);

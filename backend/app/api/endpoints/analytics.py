@@ -333,10 +333,10 @@ def generate_report(
     risk_areas = "Stress levels show slight spikes midweek."
     suggested_improvements = "Take short 5-minute breathing pauses during continuous desk sessions."
     
-    # If the user has a gemini api key, try to generate dynamically
-    if engine.gemini_api_key and not engine.gemini_api_key.startswith("mock"):
+    # If the user has a groq or gemini api key, try to generate dynamically
+    if engine.groq_api_key and not engine.groq_api_key.startswith("mock"):
         try:
-            # We can formulate a quick prompt call to Gemini for dynamic synthesis
+            # We can formulate a quick prompt call to Groq for dynamic synthesis
             metrics_summary = {
                 "overall_wellness": summary_data["overallWellnessScore"],
                 "avg_sleep": summary_data["averageSleep"],

@@ -9,11 +9,11 @@ import '../models/chat_session_model.dart';
 abstract class ChatRemoteDataSource {
   Future<ChatSessionModel> createSession(String userId, String title);
   Future<List<ChatSessionModel>> getSessions(String userId);
-  Future<List<ChatMessageModel>> getMessages(String sessionId);
-  Future<void> saveMessage(ChatMessageModel message);
+  Future<List<ChatMessageModel>> getMessages(String sessionId, {String? userId});
+  Future<void> saveMessage(ChatMessageModel message, {String? userId});
   Future<void> deleteSession(String sessionId);
   Future<void> renameSession(String sessionId, String newTitle);
-  Future<String> getGeminiResponse(String prompt, List<ChatMessageModel> history, {String? userContext});
+  Future<String> getGroqResponse(String prompt, List<ChatMessageModel> history, {String? userContext});
 }
 
 class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
@@ -56,33 +56,37 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     try {
       final snapshot = await _sessionsCollection
           .where('userId', isEqualTo: userId)
-          .orderBy('updatedAt', descending: true)
           .get();
 
-      return snapshot.docs.map((doc) => ChatSessionModel.fromFirestore(doc)).toList();
+      final list = snapshot.docs.map((doc) => ChatSessionModel.fromFirestore(doc)).toList();
+      list.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+      return list;
     } catch (e) {
       throw ServerException(message: 'Failed to fetch chat sessions: ${e.toString()}');
     }
   }
 
   @override
-  Future<List<ChatMessageModel>> getMessages(String sessionId) async {
+  Future<List<ChatMessageModel>> getMessages(String sessionId, {String? userId}) async {
     try {
-      final snapshot = await _messagesCollection
-          .where('sessionId', isEqualTo: sessionId)
-          .orderBy('createdAt', descending: false)
-          .get();
+      Query<Map<String, dynamic>> query = _messagesCollection.where('sessionId', isEqualTo: sessionId);
+      if (userId != null && userId.isNotEmpty) {
+        query = query.where('userId', isEqualTo: userId);
+      }
+      final snapshot = await query.get();
 
-      return snapshot.docs.map((doc) => ChatMessageModel.fromFirestore(doc)).toList();
+      final list = snapshot.docs.map((doc) => ChatMessageModel.fromFirestore(doc)).toList();
+      list.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      return list;
     } catch (e) {
       throw ServerException(message: 'Failed to fetch chat messages: ${e.toString()}');
     }
   }
 
   @override
-  Future<void> saveMessage(ChatMessageModel message) async {
+  Future<void> saveMessage(ChatMessageModel message, {String? userId}) async {
     try {
-      await _messagesCollection.doc(message.messageId).set(message.toFirestore());
+      await _messagesCollection.doc(message.messageId).set(message.toFirestore(userId));
       
       // Update session's updatedAt time
       try {
@@ -128,8 +132,8 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }
 
   @override
-  Future<String> getGeminiResponse(String prompt, List<ChatMessageModel> history, {String? userContext}) async {
-    final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+  Future<String> getGroqResponse(String prompt, List<ChatMessageModel> history, {String? userContext}) async {
+    final apiKey = dotenv.env['GROQ_API_KEY'] ?? dotenv.env['GEMINI_API_KEY'] ?? '';
 
     // Safety crisis triggers detection
     final lower = prompt.toLowerCase();
@@ -141,7 +145,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       return "I hear how much pain you're in, and I want to support you, but as an AI wellness companion, I cannot provide crisis care. Please reach out to someone who can help. You can call or text the Suicide & Crisis Lifeline at 988 (in the US) or contact your local emergency services or a trusted crisis hotline. You are not alone.";
     }
 
-    if (apiKey.isEmpty || apiKey == 'mock_gemini_key_for_testing' || apiKey.startsWith('mock')) {
+    if (apiKey.isEmpty || apiKey == 'mock_groq_key_for_testing' || apiKey.startsWith('mock')) {
       // Mock AI replies tailored to IT stressors
       await Future<void>.delayed(const Duration(milliseconds: 1500));
       if (lower.contains('mood')) {
@@ -157,69 +161,72 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     }
 
     try {
-      // Format history messages into Gemini chat format (limit context history to last 10 messages to avoid token blowouts)
-      final contents = <Map<String, dynamic>>[];
+      // Format messages into OpenAI-compatible format for Groq API
+      final messages = <Map<String, String>>[
+        <String, String>{
+          'role': 'system',
+          'content': PromptTemplates.systemInstruction,
+        }
+      ];
+
       final startIdx = history.length > 10 ? history.length - 10 : 0;
-      
       for (int i = startIdx; i < history.length; i++) {
         final msg = history[i];
-        contents.add(<String, dynamic>{
-          'role': msg.sender == 'user' ? 'user' : 'model',
-          'parts': <Map<String, String>>[
-            <String, String>{'text': msg.message}
-          ],
+        messages.add(<String, String>{
+          'role': msg.sender == 'user' ? 'user' : 'assistant',
+          'content': msg.message,
         });
       }
 
       // Format current prompt with context info
       final fullPrompt = PromptTemplates.buildUserPrompt(prompt, userContext ?? 'No metrics logged yet today.');
-      contents.add(<String, dynamic>{
+      messages.add(<String, String>{
         'role': 'user',
-        'parts': <Map<String, String>>[
-          <String, String>{'text': fullPrompt}
-        ],
+        'content': fullPrompt,
       });
 
       final response = await _dio.post<Map<String, dynamic>>(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent',
-        queryParameters: <String, String>{'key': apiKey},
+        'https://api.groq.com/openai/v1/chat/completions',
         data: <String, dynamic>{
-          'contents': contents,
-          'systemInstruction': <String, dynamic>{
-            'parts': <Map<String, String>>[
-              <String, String>{'text': PromptTemplates.systemInstruction}
-            ]
-          }
+          'model': 'llama-3.3-70b-versatile',
+          'messages': messages,
+          'temperature': 0.7,
+          'max_tokens': 1024,
         },
         options: Options(
+          headers: <String, String>{
+            'Authorization': 'Bearer $apiKey',
+            'Content-Type': 'application/json',
+          },
           sendTimeout: const Duration(seconds: 12),
           receiveTimeout: const Duration(seconds: 12),
         ),
       );
 
       if (response.statusCode == 200 && response.data != null) {
-        final candidates = response.data!['candidates'] as List<dynamic>?;
-        if (candidates != null && candidates.isNotEmpty) {
-          final content = candidates.first['content'] as Map<String, dynamic>?;
-          if (content != null) {
-            final parts = content['parts'] as List<dynamic>?;
-            if (parts != null && parts.isNotEmpty) {
-              return parts.first['text'] as String? ?? 'Empty response received.';
+        final choices = response.data!['choices'] as List<dynamic>?;
+        if (choices != null && choices.isNotEmpty) {
+          final firstChoice = choices.first as Map<String, dynamic>?;
+          final message = firstChoice?['message'] as Map<String, dynamic>?;
+          if (message != null) {
+            final content = message['content'] as String?;
+            if (content != null && content.isNotEmpty) {
+              return content.trim();
             }
           }
         }
-        return 'I could not parse a valid content response from the Gemini API.';
+        return 'I could not parse a valid content response from the Groq API.';
       } else {
-        throw ServerException(message: 'Gemini server returned status ${response.statusCode}');
+        throw ServerException(message: 'Groq server returned status ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout ||
           e.type == DioExceptionType.sendTimeout) {
-        throw const NetworkException(message: 'Gemini request timed out. Please try again.');
+        throw const NetworkException(message: 'Groq API request timed out. Please try again.');
       }
       if (e.response != null) {
-        final errorMsg = e.response?.data?['error']?['message']?.toString() ?? 'Gemini service error';
+        final errorMsg = e.response?.data?['error']?['message']?.toString() ?? 'Groq service error';
         throw ServerException(message: errorMsg);
       }
       throw NetworkException(message: e.message ?? 'Failed to connect to AI server.');

@@ -18,7 +18,10 @@ class Settings:
     # Firebase Admin SDK Configuration
     FIREBASE_CREDENTIALS_PATH: Optional[str] = os.getenv("FIREBASE_CREDENTIALS_PATH")
     
-    # Google Gemini API Configuration
+    # Groq API Configuration
+    GROQ_API_KEY: Optional[str] = os.getenv("GROQ_API_KEY")
+    
+    # Google Gemini API Configuration (Legacy/Fallback)
     GEMINI_API_KEY: Optional[str] = os.getenv("GEMINI_API_KEY")
 
     # Rate Limiting Configuration (requests per minute per IP)

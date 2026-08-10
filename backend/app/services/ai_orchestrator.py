@@ -8,7 +8,7 @@ from loguru import logger
 
 class AIOrchestrator:
     def __init__(self):
-        self.api_key = os.getenv("GEMINI_API_KEY", "")
+        self.api_key = os.getenv("GROQ_API_KEY", os.getenv("GEMINI_API_KEY", ""))
 
     async def generate_summary(self, user_id: str, metrics: Dict[str, Any], summary_type: str = "daily") -> str:
         # Check cache first
@@ -33,8 +33,8 @@ class AIOrchestrator:
         else:
             prompt = f"Write a mental wellness check-in summary for these indicators: {str(metrics)}"
 
-        # Fetch from Gemini with retries
-        summary = await self._execute_gemini_request_with_retry(prompt)
+        # Fetch from Groq with retries
+        summary = await self._execute_groq_request_with_retry(prompt)
         
         # Cache results (TTL = 1 hour for daily, 12 hours for weekly)
         ttl = 3600 if summary_type == "daily" else 43200
@@ -42,18 +42,32 @@ class AIOrchestrator:
         return summary
 
     async def _execute_gemini_request_with_retry(self, prompt: str, max_retries: int = 3) -> str:
+        return await self._execute_groq_request_with_retry(prompt, max_retries)
+
+    async def _execute_groq_request_with_retry(self, prompt: str, max_retries: int = 3) -> str:
         if not self.api_key or self.api_key.startswith("mock"):
-            logger.warning("Mocking Gemini AI content generation.")
+            logger.warning("Mocking Groq AI content generation.")
             return "MindSync Developer Check-in: You are making steady progress. Keep focus high, and take short screen breaks."
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={self.api_key}"
-        headers = {"Content-Type": "application/json"}
+        url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
         payload = {
-            "contents": [{
-                "parts": [{
-                    "text": prompt
-                }]
-            }]
+            "model": "llama-3.3-70b-versatile",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are MindSync AI, an expert mental wellness companion for software developers."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            "temperature": 0.7,
+            "max_tokens": 1024
         }
 
         async with httpx.AsyncClient() as client:
@@ -62,15 +76,15 @@ class AIOrchestrator:
                     response = await client.post(url, json=payload, headers=headers, timeout=10.0)
                     if response.status_code == 200:
                         data = response.json()
-                        text = data['candidates'][0]['content']['parts'][0]['text']
+                        text = data['choices'][0]['message']['content']
                         return text.strip()
                     else:
-                        logger.warning(f"Gemini API returned status {response.status_code}. Retrying...")
+                        logger.warning(f"Groq API returned status {response.status_code}. Retrying...")
                 except Exception as e:
-                    logger.warning(f"Gemini API request failed on attempt {attempt+1}: {e}")
+                    logger.warning(f"Groq API request failed on attempt {attempt+1}: {e}")
                 
                 await asyncio.sleep(2 ** attempt)
 
         # Fallback response
-        logger.error("Gemini AI API requests failed after maximum retries. Returning fallback.")
+        logger.error("Groq AI API requests failed after maximum retries. Returning fallback.")
         return "MindSync AI: We could not synchronize live suggestions. Focus on balancing your hydration levels and screen timing today."

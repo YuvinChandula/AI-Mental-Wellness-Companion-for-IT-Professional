@@ -40,14 +40,19 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Future<List<ChatMessage>> getMessages(String sessionId) async {
+  Future<List<ChatMessage>> getMessages(String sessionId, {String? userId}) async {
     try {
-      final messages = await remoteDataSource.getMessages(sessionId);
-      await localDataSource.cacheMessages(sessionId, messages);
+      final messages = await remoteDataSource.getMessages(sessionId, userId: userId);
+      if (userId != null && userId.isNotEmpty) {
+        await localDataSource.cacheMessages(userId, sessionId, messages);
+      }
       return messages;
     } catch (_) {
       // Offline fallback
-      return await localDataSource.getCachedMessages(sessionId);
+      if (userId != null && userId.isNotEmpty) {
+        return await localDataSource.getCachedMessages(userId, sessionId);
+      }
+      return <ChatMessage>[];
     }
   }
 
@@ -56,19 +61,24 @@ class ChatRepositoryImpl implements ChatRepository {
     String sessionId,
     ChatMessage message, {
     String? userContext,
+    String? userId,
   }) async {
     final userModel = ChatMessageModel.fromEntity(message);
 
     // 1. Save user message remotely & cache locally
     try {
-      await remoteDataSource.saveMessage(userModel);
+      await remoteDataSource.saveMessage(userModel, userId: userId);
     } catch (_) {}
-    final history = await localDataSource.getCachedMessages(sessionId);
+    final history = (userId != null && userId.isNotEmpty)
+        ? await localDataSource.getCachedMessages(userId, sessionId)
+        : <ChatMessageModel>[];
     history.add(userModel);
-    await localDataSource.cacheMessages(sessionId, history);
+    if (userId != null && userId.isNotEmpty) {
+      await localDataSource.cacheMessages(userId, sessionId, history);
+    }
 
-    // 2. Fetch response from Gemini API
-    final aiText = await remoteDataSource.getGeminiResponse(
+    // 2. Fetch response from Groq API
+    final aiText = await remoteDataSource.getGroqResponse(
       message.message,
       history,
       userContext: userContext,
@@ -85,10 +95,12 @@ class ChatRepositoryImpl implements ChatRepository {
 
     // 4. Save model message remotely & cache locally
     try {
-      await remoteDataSource.saveMessage(aiMessage);
+      await remoteDataSource.saveMessage(aiMessage, userId: userId);
     } catch (_) {}
     history.add(aiMessage);
-    await localDataSource.cacheMessages(sessionId, history);
+    if (userId != null && userId.isNotEmpty) {
+      await localDataSource.cacheMessages(userId, sessionId, history);
+    }
 
     return aiMessage;
   }

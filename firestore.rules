@@ -60,15 +60,13 @@ service cloud.firestore {
 
     // 7. Chat coach history
     match /chat_sessions/{sessionId} {
-      allow read: if isAuthenticated();
+      allow read, update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
 
     match /chat_messages/{msgId} {
-      allow read: if isAuthenticated();
+      allow read, update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
 
     // 8. Notifications & preferences

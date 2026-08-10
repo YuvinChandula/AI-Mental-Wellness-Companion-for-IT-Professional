@@ -421,6 +421,7 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
 
       if (response.statusCode == 200 && response.data != null) {
         final Map<String, dynamic> reportMap = response.data!['data'] as Map<String, dynamic>;
+        reportMap['userId'] = userId;
         final WellnessReportModel report = WellnessReportModel.fromMap(reportMap);
         
         try {
@@ -437,8 +438,9 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
             .map((dynamic e) => Map<String, dynamic>.from(e as Map))
             .toList();
             
+        updatedList.removeWhere((m) => m['reportId'] == report.reportId);
         updatedList.insert(0, report.toMap());
-        if (updatedList.length > 10) updatedList.removeLast();
+        if (updatedList.length > 20) updatedList.removeLast();
         await box.put(listKey, updatedList);
 
         return report;
@@ -499,6 +501,7 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     final box = StorageService.getBox(AppConstants.cacheBoxName);
     final String cacheKey = 'past_reports_$userId';
 
+    List<WellnessReportModel> firestoreReports = <WellnessReportModel>[];
     try {
       final QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
           .collection('reports')
@@ -506,22 +509,34 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
           .limit(20)
           .get();
 
-      final List<WellnessReportModel> list = snapshot.docs
+      firestoreReports = snapshot.docs
           .map((QueryDocumentSnapshot<Map<String, dynamic>> doc) => WellnessReportModel.fromFirestore(doc))
           .toList();
-      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      
-      await box.put(cacheKey, list.map((WellnessReportModel r) => r.toMap()).toList());
-      return list;
-    } catch (e) {
-      final List<dynamic>? cachedRaw = box.get(cacheKey) as List<dynamic>?;
-      if (cachedRaw != null) {
-        return cachedRaw
+    } catch (_) {}
+
+    final List<dynamic>? cachedRaw = box.get(cacheKey) as List<dynamic>?;
+    final List<WellnessReportModel> cachedReports = cachedRaw != null
+        ? cachedRaw
             .map((dynamic e) => WellnessReportModel.fromMap(Map<String, dynamic>.from(e as Map)))
-            .toList();
-      }
-      return <WellnessReport>[];
+            .toList()
+        : <WellnessReportModel>[];
+
+    final Map<String, WellnessReportModel> mergedMap = <String, WellnessReportModel>{};
+    for (final WellnessReportModel r in cachedReports) {
+      mergedMap[r.reportId] = r;
     }
+    for (final WellnessReportModel r in firestoreReports) {
+      mergedMap[r.reportId] = r;
+    }
+
+    final List<WellnessReportModel> mergedList = mergedMap.values.toList();
+    mergedList.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+    if (mergedList.isNotEmpty) {
+      await box.put(cacheKey, mergedList.map((WellnessReportModel r) => r.toMap()).toList());
+    }
+
+    return mergedList;
   }
 
   @override

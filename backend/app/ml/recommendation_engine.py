@@ -4,13 +4,15 @@ import os
 
 class HybridRecommendationEngine:
     def __init__(self):
-        self.gemini_api_key = os.getenv("GEMINI_API_KEY", "")
+        self.groq_api_key = os.getenv("GROQ_API_KEY", os.getenv("GEMINI_API_KEY", ""))
+        self.gemini_api_key = self.groq_api_key
         # If running locally, let's load from .env if present
-        if not self.gemini_api_key:
+        if not self.groq_api_key:
             try:
                 from dotenv import load_dotenv
                 load_dotenv()
-                self.gemini_api_key = os.getenv("GEMINI_API_KEY", "")
+                self.groq_api_key = os.getenv("GROQ_API_KEY", os.getenv("GEMINI_API_KEY", ""))
+                self.gemini_api_key = self.groq_api_key
             except ImportError:
                 pass
 
@@ -119,14 +121,14 @@ class HybridRecommendationEngine:
                 "feedback": ""
             })
 
-        # 3. Gemini AI Recommendations
+        # 3. Groq AI Recommendations
         # Fetch creative lifestyle recommendations if key is configured
-        if self.gemini_api_key and not self.gemini_api_key.startswith("mock"):
+        if self.groq_api_key and not self.groq_api_key.startswith("mock"):
             try:
-                gemini_recs = self._fetch_gemini_recs(metrics, burnout_risk)
-                recommendations.extend(gemini_recs)
+                groq_recs = self._fetch_groq_recs(metrics, burnout_risk)
+                recommendations.extend(groq_recs)
             except Exception as e:
-                print(f"Warning: Gemini recommendations failed, falling back. Error: {str(e)}")
+                print(f"Warning: Groq recommendations failed, falling back. Error: {str(e)}")
                 recommendations.append(self._get_fallback_gemini_rec())
         else:
             # Fallback creative recommendation when key is mock
@@ -135,7 +137,10 @@ class HybridRecommendationEngine:
         return recommendations
 
     def _fetch_gemini_recs(self, metrics: dict, burnout_risk: str) -> list:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={self.gemini_api_key}"
+        return self._fetch_groq_recs(metrics, burnout_risk)
+
+    def _fetch_groq_recs(self, metrics: dict, burnout_risk: str) -> list:
+        url = "https://api.groq.com/openai/v1/chat/completions"
         
         system_instruction = (
             "You are an expert IT wellness coach. Based on the user's daily metrics, "
@@ -158,7 +163,7 @@ class HybridRecommendationEngine:
         Respond with a JSON array containing exactly 2 objects matching this schema:
         [
           {{
-            "recommendationId": "gemini_01",
+            "recommendationId": "groq_01",
             "title": "Creative Title",
             "description": "Actionable description",
             "reason": "Why this was suggested based on their low sleep, high stress, etc.",
@@ -169,7 +174,7 @@ class HybridRecommendationEngine:
             "estimatedTime": "15 min",
             "difficultyLevel": "Easy",
             "suggestedFollowUp": "Follow up task",
-            "source": "Gemini AI",
+            "source": "Groq AI",
             "completed": false,
             "saved": false,
             "feedback": ""
@@ -177,32 +182,42 @@ class HybridRecommendationEngine:
         ]
         """
 
-        headers = {"Content-Type": "application/json"}
+        headers = {
+            "Authorization": f"Bearer {self.groq_api_key}",
+            "Content-Type": "application/json"
+        }
         payload = {
-            "contents": [
-                {"role": "user", "parts": [{"text": prompt}]}
+            "model": "llama-3.3-70b-versatile",
+            "messages": [
+                {"role": "system", "content": system_instruction},
+                {"role": "user", "content": prompt}
             ],
-            "systemInstruction": {
-                "parts": [{"text": system_instruction}]
-            }
+            "temperature": 0.7,
+            "response_format": {"type": "json_object"}
         }
 
         response = requests.post(url, headers=headers, json=payload, timeout=8)
         if response.status_code == 200:
             data = response.json()
-            text = data['candidates'][0]['content']['parts'][0]['text']
+            text = data['choices'][0]['message']['content']
             
             # Clean possible markdown wrapping
             text = text.replace("```json", "").replace("```", "").strip()
             
-            recs = json.loads(text)
-            return recs
+            res_json = json.loads(text)
+            if isinstance(res_json, dict) and "recommendations" in res_json:
+                return res_json["recommendations"]
+            elif isinstance(res_json, dict) and "data" in res_json:
+                return res_json["data"]
+            elif isinstance(res_json, list):
+                return res_json
+            return [res_json]
         else:
-            raise Exception(f"Gemini API returned status {response.status_code}")
+            raise Exception(f"Groq API returned status {response.status_code}")
 
     def _get_fallback_gemini_rec(self) -> dict:
         return {
-            "recommendationId": "gemini_fallback_mock",
+            "recommendationId": "groq_fallback_mock",
             "title": "IT Workday Screen Break",
             "description": "Every 50 minutes, look at an object 20 feet away for 20 seconds. Put your phone down and let your eyes relax.",
             "reason": "Sedentary screen hours increase eye fatigue and mental exhaustion.",
@@ -213,7 +228,7 @@ class HybridRecommendationEngine:
             "estimatedTime": "5 min",
             "difficultyLevel": "Easy",
             "suggestedFollowUp": "Walk to refill your water glass.",
-            "source": "Gemini AI",
+            "source": "Groq AI",
             "completed": False,
             "saved": False,
             "feedback": ""

@@ -4,6 +4,8 @@ import '../../features/reports/domain/entities/wellness_report.dart';
 import '../../features/reports/domain/repositories/analytics_repository.dart';
 
 class DemoAnalyticsRepository implements AnalyticsRepository {
+  final List<WellnessReport> _demoReports = <WellnessReport>[];
+
   static const AnalyticsSummary _summary = AnalyticsSummary(
     overallWellnessScore: 82,
     averageMood: 3.8,
@@ -38,25 +40,28 @@ class DemoAnalyticsRepository implements AnalyticsRepository {
   @override
   Future<List<WellnessReport>> getPastReports() async {
     await Future<void>.delayed(const Duration(milliseconds: 400));
-    return <WellnessReport>[
-      WellnessReport(
-        reportId: 'demo-report-1',
-        userId: 'demo-user-001',
-        startDate: DateTime.now().subtract(const Duration(days: 7)).toIso8601String(),
-        endDate: DateTime.now().toIso8601String(),
-        wellnessScore: 82,
-        summaryText: 'Steady mood with moderate stress during sprint week.',
-        moodAnalysis: const <String, dynamic>{'average': 3.8},
-        stressAnalysis: const <String, dynamic>{'average': 2.6},
-        sleepAnalysis: const <String, dynamic>{'averageHours': 7.1},
-        activityAnalysis: const <String, dynamic>{'minutes': 28},
-        hydrationAnalysis: const <String, dynamic>{'liters': 1.9},
-        burnoutAnalysis: const <String, dynamic>{'risk': 'Moderate'},
-        recommendationSuccess: const <String, dynamic>{'rate': 0.76},
-        aiInsights: const <String, dynamic>{'tip': 'Schedule short breaks between meetings.'},
-        createdAt: DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
-      ),
-    ];
+    if (_demoReports.isEmpty) {
+      _demoReports.add(
+        WellnessReport(
+          reportId: 'demo-report-1',
+          userId: 'demo-user-001',
+          startDate: DateTime.now().subtract(const Duration(days: 7)).toIso8601String(),
+          endDate: DateTime.now().toIso8601String(),
+          wellnessScore: 82,
+          summaryText: 'Steady mood with moderate stress during sprint week.',
+          moodAnalysis: const <String, dynamic>{'average': 3.8},
+          stressAnalysis: const <String, dynamic>{'average': 2.6},
+          sleepAnalysis: const <String, dynamic>{'averageHours': 7.1},
+          activityAnalysis: const <String, dynamic>{'minutes': 28},
+          hydrationAnalysis: const <String, dynamic>{'liters': 1.9},
+          burnoutAnalysis: const <String, dynamic>{'risk': 'Moderate'},
+          recommendationSuccess: const <String, dynamic>{'rate': 0.76},
+          aiInsights: const <String, dynamic>{'tip': 'Schedule short breaks between meetings.'},
+          createdAt: DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
+        ),
+      );
+    }
+    return List<WellnessReport>.from(_demoReports);
   }
 
   @override
@@ -85,7 +90,26 @@ class DemoAnalyticsRepository implements AnalyticsRepository {
 
   @override
   Future<WellnessReport> generateReport({bool forceRefresh = false}) async {
-    final List<WellnessReport> reports = await getPastReports();
-    return reports.first;
+    await getPastReports();
+    final String newId = 'demo-report-${DateTime.now().millisecondsSinceEpoch}';
+    final WellnessReport newReport = WellnessReport(
+      reportId: newId,
+      userId: 'demo-user-001',
+      startDate: DateTime.now().subtract(const Duration(days: 7)).toIso8601String(),
+      endDate: DateTime.now().toIso8601String(),
+      wellnessScore: 85,
+      summaryText: 'Newly generated demo wellness summary report with complete insights.',
+      moodAnalysis: const <String, dynamic>{'average': 4.2},
+      stressAnalysis: const <String, dynamic>{'average': 2.1},
+      sleepAnalysis: const <String, dynamic>{'averageHours': 7.8},
+      activityAnalysis: const <String, dynamic>{'minutes': 35},
+      hydrationAnalysis: const <String, dynamic>{'liters': 2.2},
+      burnoutAnalysis: const <String, dynamic>{'risk': 'Low'},
+      recommendationSuccess: const <String, dynamic>{'rate': 0.88},
+      aiInsights: const <String, dynamic>{'tip': 'Keep up the hydration and regular physical exercise habits.'},
+      createdAt: DateTime.now().toIso8601String(),
+    );
+    _demoReports.insert(0, newReport);
+    return newReport;
   }
 }
