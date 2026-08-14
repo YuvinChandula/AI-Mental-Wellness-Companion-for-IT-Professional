@@ -122,8 +122,8 @@ class HybridRecommendationEngine:
             })
 
         # 3. Groq AI Recommendations
-        # Fetch creative lifestyle recommendations if key is configured
-        if self.groq_api_key and not self.groq_api_key.startswith("mock"):
+        # Fetch creative lifestyle recommendations if valid key is configured
+        if self.groq_api_key and not self.groq_api_key.startswith("mock") and "your_" not in self.groq_api_key.lower() and "api_key" not in self.groq_api_key.lower():
             try:
                 groq_recs = self._fetch_groq_recs(metrics, burnout_risk)
                 recommendations.extend(groq_recs)

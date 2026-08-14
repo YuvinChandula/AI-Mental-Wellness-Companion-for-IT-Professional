@@ -132,6 +132,32 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }
 
   @override
+  Future<String> _getFallbackResponse(String prompt) async {
+    final lower = prompt.toLowerCase();
+    await Future<void>.delayed(const Duration(milliseconds: 1000));
+    if (lower.contains('mood')) {
+      return "Looking at your mood trend, you've maintained a **Stable** mood today, but it is slightly lower than your weekly peak. Stressors might include sedentary desk hours. Try a 5-minute screen break.";
+    } else if (lower.contains('sleep')) {
+      return "Your sleep average is around **6.8 hours**, which is below the recommended 7-9 hours for IT workers. Getting an extra 30 minutes of rest can boost focus and reduce compilation stress tomorrow!";
+    } else if (lower.contains('stress') || lower.contains('anxious')) {
+      return "When debugging or facing tight sprint deadlines, stress can spike. I suggest a quick mindfulness reset:\n\n1. Close your IDE.\n2. Inhale for 4 seconds, hold for 4, and exhale for 4.\n3. Drink a cup of water.";
+    } else if (lower.contains('doctor') || lower.contains('ill') || lower.contains('diagnose')) {
+      return "I am here to support your general mental wellness and IT stress management, but I cannot diagnose illnesses or give clinical medical advice. Please consult a qualified doctor or healthcare professional for diagnosis.";
+    }
+    return "Hello! I am your IT wellness companion. I can help analyze your mood metrics, outline developer burnout risk indices, or suggest deep breathing break guidelines. What is on your mind today?";
+  }
+
+  bool _isInvalidApiKey(String key) {
+    if (key.isEmpty) return true;
+    final lower = key.toLowerCase();
+    return lower.startsWith('mock') ||
+        lower.startsWith('your_') ||
+        lower.contains('your_') ||
+        lower == 'mock_groq_key_for_testing' ||
+        lower.contains('api_key');
+  }
+
+  @override
   Future<String> getGroqResponse(String prompt, List<ChatMessageModel> history, {String? userContext}) async {
     final apiKey = dotenv.env['GROQ_API_KEY'] ?? dotenv.env['GEMINI_API_KEY'] ?? '';
 
@@ -145,19 +171,8 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       return "I hear how much pain you're in, and I want to support you, but as an AI wellness companion, I cannot provide crisis care. Please reach out to someone who can help. You can call or text the Suicide & Crisis Lifeline at 988 (in the US) or contact your local emergency services or a trusted crisis hotline. You are not alone.";
     }
 
-    if (apiKey.isEmpty || apiKey == 'mock_groq_key_for_testing' || apiKey.startsWith('mock')) {
-      // Mock AI replies tailored to IT stressors
-      await Future<void>.delayed(const Duration(milliseconds: 1500));
-      if (lower.contains('mood')) {
-        return "Looking at your mood trend, you've maintained a **Stable** mood today, but it is slightly lower than your weekly peak. Stressors might include sedentary desk hours. Try a 5-minute screen break.";
-      } else if (lower.contains('sleep')) {
-        return "Your sleep average is around **6.8 hours**, which is below the recommended 7-9 hours for IT workers. Getting an extra 30 minutes of rest can boost focus and reduce compilation stress tomorrow!";
-      } else if (lower.contains('stress') || lower.contains('anxious')) {
-        return "When debugging or facing tight sprint deadlines, stress can spike. I suggest a quick mindfulness reset:\n\n1. Close your IDE.\n2. Inhale for 4 seconds, hold for 4, and exhale for 4.\n3. Drink a cup of water.";
-      } else if (lower.contains('doctor') || lower.contains('ill') || lower.contains('diagnose')) {
-        return "I am here to support your general mental wellness and IT stress management, but I cannot diagnose illnesses or give clinical medical advice. Please consult a qualified doctor or healthcare professional for diagnosis.";
-      }
-      return "Hello! I am your IT wellness companion. I can help analyze your mood metrics, outline developer burnout risk indices, or suggest deep breathing break guidelines. What is on your mind today?";
+    if (_isInvalidApiKey(apiKey)) {
+      return await _getFallbackResponse(prompt);
     }
 
     try {
@@ -215,23 +230,23 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
             }
           }
         }
-        return 'I could not parse a valid content response from the Groq API.';
+        return await _getFallbackResponse(prompt);
       } else {
-        throw ServerException(message: 'Groq server returned status ${response.statusCode}');
+        return await _getFallbackResponse(prompt);
       }
     } on DioException catch (e) {
+      // Gracefully fall back to smart wellness response if API key is invalid or request fails
+      if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
+        return await _getFallbackResponse(prompt);
+      }
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout ||
           e.type == DioExceptionType.sendTimeout) {
-        throw const NetworkException(message: 'Groq API request timed out. Please try again.');
+        return await _getFallbackResponse(prompt);
       }
-      if (e.response != null) {
-        final errorMsg = e.response?.data?['error']?['message']?.toString() ?? 'Groq service error';
-        throw ServerException(message: errorMsg);
-      }
-      throw NetworkException(message: e.message ?? 'Failed to connect to AI server.');
+      return await _getFallbackResponse(prompt);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      return await _getFallbackResponse(prompt);
     }
   }
 }

@@ -45,8 +45,8 @@ class AIOrchestrator:
         return await self._execute_groq_request_with_retry(prompt, max_retries)
 
     async def _execute_groq_request_with_retry(self, prompt: str, max_retries: int = 3) -> str:
-        if not self.api_key or self.api_key.startswith("mock"):
-            logger.warning("Mocking Groq AI content generation.")
+        if not self.api_key or self.api_key.startswith("mock") or "your_" in self.api_key.lower() or "api_key" in self.api_key.lower():
+            logger.warning("Mocking Groq AI content generation due to placeholder or mock key.")
             return "MindSync Developer Check-in: You are making steady progress. Keep focus high, and take short screen breaks."
 
         url = "https://api.groq.com/openai/v1/chat/completions"
