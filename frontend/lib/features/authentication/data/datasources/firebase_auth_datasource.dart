@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hive/hive.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../models/user_model.dart';
 
@@ -24,6 +26,21 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
   })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
         _firestore = firestore ?? FirebaseFirestore.instance;
 
+  /// Store the Firebase ID token in Hive so AuthInterceptor can
+  /// attach it to every outgoing HTTP request to the Render backend.
+  Future<void> _persistFirebaseToken(User user) async {
+    try {
+      final String? idToken = await user.getIdToken();
+      if (idToken != null && Hive.isBoxOpen(AppConstants.authBoxName)) {
+        final Box<dynamic> authBox = Hive.box<dynamic>(AppConstants.authBoxName);
+        await authBox.put(AppConstants.keyJwtToken, idToken);
+      }
+    } catch (e) {
+      // Non-fatal: token storage failure should not block login
+      print('FirebaseAuthDataSource: Failed to persist token: $e');
+    }
+  }
+
   @override
   Future<UserModel?> signIn(String email, String password) async {
     try {
@@ -33,6 +50,10 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
       );
 
       if (credential.user == null) return null;
+
+      // Persist the Firebase ID token for backend API calls
+      await _persistFirebaseToken(credential.user!);
+
       return await _getUserFromFirestore(credential.user!.uid);
     } on FirebaseAuthException catch (e) {
       throw ServerException(message: e.message ?? 'Authentication failed.', statusCode: 400);
@@ -65,6 +86,9 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
       // Save user profile inside firestore collection 'users'
       await _firestore.collection('users').doc(firebaseUser.uid).set(userModel.toJson());
 
+      // Persist the Firebase ID token for backend API calls
+      await _persistFirebaseToken(firebaseUser);
+
       // Send verification email immediately
       await firebaseUser.sendEmailVerification();
 
@@ -79,6 +103,11 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
   @override
   Future<void> logout() async {
     try {
+      // Clear stored token on logout
+      if (Hive.isBoxOpen(AppConstants.authBoxName)) {
+        final Box<dynamic> authBox = Hive.box<dynamic>(AppConstants.authBoxName);
+        await authBox.delete(AppConstants.keyJwtToken);
+      }
       await _firebaseAuth.signOut();
     } catch (e) {
       throw ServerException(message: e.toString());
@@ -112,6 +141,8 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
   Future<UserModel?> getCurrentUser() async {
     final User? firebaseUser = _firebaseAuth.currentUser;
     if (firebaseUser == null) return null;
+    // Refresh the stored token on app relaunch / session restore
+    await _persistFirebaseToken(firebaseUser);
     return await _getUserFromFirestore(firebaseUser.uid);
   }
 
@@ -122,6 +153,8 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
     await firebaseUser.reload();
     final User? refreshedUser = _firebaseAuth.currentUser;
     if (refreshedUser == null) return null;
+    // Refresh the stored token after user reload
+    await _persistFirebaseToken(refreshedUser);
     return await _getUserFromFirestore(refreshedUser.uid);
   }
 

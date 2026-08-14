@@ -11,9 +11,11 @@ class AuthInterceptor extends Interceptor {
         final Box<dynamic> authBox = Hive.box<dynamic>(AppConstants.authBoxName);
         token = authBox.get(AppConstants.keyJwtToken) as String?;
       }
-      token ??= 'mock_user_123';
 
-      options.headers['Authorization'] = 'Bearer $token';
+      // Only attach Authorization header if we have a real Firebase token
+      if (token != null && token.isNotEmpty) {
+        options.headers['Authorization'] = 'Bearer $token';
+      }
     } catch (e) {
       print('AuthInterceptor Error: $e');
     }
