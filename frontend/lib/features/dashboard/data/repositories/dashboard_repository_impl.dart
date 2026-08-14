@@ -1,5 +1,6 @@
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/services/pedometer_service.dart';
 import '../../../mood/data/datasources/mood_local_datasource.dart';
 import '../../../mood/data/models/mood_log_model.dart';
 import '../../domain/entities/activity_summary.dart';
@@ -47,7 +48,19 @@ class DashboardRepositoryImpl implements DashboardRepository {
       final logs = await moodLocalDataSource!.getCachedHistory(userId);
       if (logs.isNotEmpty) {
         final now = DateTime.now();
-        final monday = DateTime(now.year, now.month, now.day).subtract(Duration(days: now.weekday - 1));
+        final todayStart = DateTime(now.year, now.month, now.day);
+
+        MoodLogModel? todayLog;
+        for (final l in logs) {
+          if (l.createdAt.year == now.year &&
+              l.createdAt.month == now.month &&
+              l.createdAt.day == now.day) {
+            todayLog = l;
+            break;
+          }
+        }
+
+        final monday = todayStart.subtract(Duration(days: now.weekday - 1));
         final weeklyMoods = List<double>.filled(7, 0.0);
         final weeklySleepHours = List<double>.filled(7, 0.0);
         final weeklyWaterIntake = List<double>.filled(7, 0.0);
@@ -68,7 +81,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
           }
         }
 
-        final latest = logs.first;
+        final latest = todayLog ?? logs.first;
         final wellnessScore = (
           (latest.moodScore / 5.0) * 30 +
           ((10 - latest.stressLevel) / 9.0) * 20 +
@@ -80,19 +93,37 @@ class DashboardRepositoryImpl implements DashboardRepository {
         final recentMoods = logs.take(3).map((l) {
           final hour = l.createdAt.hour.toString().padLeft(2, '0');
           final min = l.createdAt.minute.toString().padLeft(2, '0');
+          final isToday = l.createdAt.year == now.year &&
+              l.createdAt.month == now.month &&
+              l.createdAt.day == now.day;
+          final yesterday = now.subtract(const Duration(days: 1));
+          final isYesterday = l.createdAt.year == yesterday.year &&
+              l.createdAt.month == yesterday.month &&
+              l.createdAt.day == yesterday.day;
+          final String dateLabel = isToday
+              ? 'Today'
+              : (isYesterday ? 'Yesterday' : '${l.createdAt.month}/${l.createdAt.day}');
           return <String, dynamic>{
             'emoji': _getEmojiForMood(l.mood),
-            'time': 'Today, $hour:$min',
+            'time': '$dateLabel, $hour:$min',
             'label': l.mood,
           };
         }).toList();
 
+        final String explanation = todayLog != null
+            ? 'Based on today\'s journal check-in (Sleep: ${todayLog.sleepHours}h, Water: ${todayLog.waterIntake}ml, Exercise: ${todayLog.exerciseMinutes}m).'
+            : 'No check-in logged for today yet. Previous log from ${_formatLogDate(logs.first.createdAt)}.';
+
+        final String lastEntryText = todayLog != null
+            ? 'Logged today'
+            : 'Logged ${_formatLogDate(logs.first.createdAt)}';
+
         final data = DashboardData(
           wellnessScore: wellnessScore,
-          wellnessExplanation: 'Based on your latest journal logs (Sleep: ${latest.sleepHours}h, Water: ${latest.waterIntake}ml, Exercise: ${latest.exerciseMinutes}m).',
+          wellnessExplanation: explanation,
           moodEmoji: _getEmojiForMood(latest.mood),
           moodTrend: 'Active',
-          lastMoodEntry: 'Logged recently',
+          lastMoodEntry: lastEntryText,
           burnoutRiskLevel: latest.stressLevel >= 7 ? 'High' : (latest.stressLevel >= 5 ? 'Moderate' : 'Low'),
           burnoutPercentage: (latest.stressLevel * 10.0).clamp(0, 100),
           recommendationText: 'Maintain continuous hydration and schedule brief focus breaks throughout your workday.',
@@ -136,6 +167,8 @@ class DashboardRepositoryImpl implements DashboardRepository {
 
   @override
   Future<ActivitySummary> getActivitySummary(String userId) async {
+    final livePedometerSteps = PedometerService.instance.currentDailySteps;
+
     if (moodLocalDataSource != null) {
       final logs = await moodLocalDataSource!.getCachedHistory(userId);
       if (logs.isNotEmpty) {
@@ -149,16 +182,17 @@ class DashboardRepositoryImpl implements DashboardRepository {
             break;
           }
         }
-        final logToUse = todayLog ?? logs.first;
-        final steps = (logToUse.exerciseMinutes * 100) + 1500;
+        final steps = livePedometerSteps > 0
+            ? livePedometerSteps
+            : (todayLog != null ? ((todayLog.exerciseMinutes * 100) + 1500) : 0);
         final activity = ActivitySummary(
           steps: steps,
           stepsGoal: 10000,
-          waterIntakeMl: logToUse.waterIntake,
+          waterIntakeMl: todayLog?.waterIntake ?? 0,
           waterIntakeGoal: 2500,
-          sleepHours: logToUse.sleepHours,
+          sleepHours: todayLog?.sleepHours ?? 0.0,
           sleepHoursGoal: 8.0,
-          exerciseMinutes: logToUse.exerciseMinutes,
+          exerciseMinutes: todayLog?.exerciseMinutes ?? 0,
           exerciseMinutesGoal: 45,
         );
         await localDataSource.cacheActivitySummary(activity, userId: userId);
@@ -168,21 +202,53 @@ class DashboardRepositoryImpl implements DashboardRepository {
 
     try {
       final activity = await remoteDataSource.getActivitySummary(userId);
-      await localDataSource.cacheActivitySummary(activity, userId: userId);
-      return activity;
+      final updated = livePedometerSteps > 0 ? activity.copyWith(steps: livePedometerSteps) : activity;
+      await localDataSource.cacheActivitySummary(updated, userId: userId);
+      return updated;
     } on NetworkException catch (e) {
       final cached = await localDataSource.getCachedActivitySummary(userId: userId);
-      if (cached != null) return cached;
+      if (cached != null) {
+        return livePedometerSteps > 0 ? cached.copyWith(steps: livePedometerSteps) : cached;
+      }
       throw NetworkFailure(message: e.message);
     } on ServerException catch (e) {
       final cached = await localDataSource.getCachedActivitySummary(userId: userId);
-      if (cached != null) return cached;
+      if (cached != null) {
+        return livePedometerSteps > 0 ? cached.copyWith(steps: livePedometerSteps) : cached;
+      }
       throw ServerFailure(message: e.message, statusCode: e.statusCode);
     } catch (e) {
       final cached = await localDataSource.getCachedActivitySummary(userId: userId);
-      if (cached != null) return cached;
-      throw ServerFailure(message: e.toString());
+      if (cached != null) {
+        return livePedometerSteps > 0 ? cached.copyWith(steps: livePedometerSteps) : cached;
+      }
+      return ActivitySummary(
+        steps: livePedometerSteps > 0 ? livePedometerSteps : 3000,
+        stepsGoal: 10000,
+        waterIntakeMl: 1500,
+        waterIntakeGoal: 2500,
+        sleepHours: 8.0,
+        sleepHoursGoal: 8.0,
+        exerciseMinutes: 15,
+        exerciseMinutesGoal: 45,
+      );
     }
+  }
+
+  @override
+  Future<void> saveActivitySummary(String userId, ActivitySummary summary) async {
+    await localDataSource.cacheActivitySummary(summary, userId: userId);
+  }
+
+  String _formatLogDate(DateTime dt) {
+    final now = DateTime.now();
+    final yesterday = now.subtract(const Duration(days: 1));
+    if (dt.year == now.year && dt.month == now.month && dt.day == now.day) {
+      return 'today';
+    } else if (dt.year == yesterday.year && dt.month == yesterday.month && dt.day == yesterday.day) {
+      return 'yesterday';
+    }
+    return '${dt.month}/${dt.day}';
   }
 
   String _getEmojiForMood(String mood) {

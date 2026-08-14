@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/services/pedometer_service.dart';
 import '../../domain/entities/activity_summary.dart';
 
 class ActivitySummaryCard extends StatelessWidget {
@@ -213,6 +214,10 @@ class ActivitySummaryCard extends StatelessWidget {
                 final text = controller.text.trim();
                 Navigator.pop(context);
                 if (text.isNotEmpty) {
+                  final parsed = int.tryParse(text);
+                  if (activityName == 'Steps' && parsed != null) {
+                    PedometerService.instance.updateStepsManually(parsed);
+                  }
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Logged $text $unit. Wellness score updated!'),

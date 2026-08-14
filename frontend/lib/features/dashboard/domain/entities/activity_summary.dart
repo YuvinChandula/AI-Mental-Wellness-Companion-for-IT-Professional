@@ -33,6 +33,28 @@ class ActivitySummary extends Equatable {
         exerciseMinutesGoal,
       ];
 
+  ActivitySummary copyWith({
+    int? steps,
+    int? stepsGoal,
+    int? waterIntakeMl,
+    int? waterIntakeGoal,
+    double? sleepHours,
+    double? sleepHoursGoal,
+    int? exerciseMinutes,
+    int? exerciseMinutesGoal,
+  }) {
+    return ActivitySummary(
+      steps: steps ?? this.steps,
+      stepsGoal: stepsGoal ?? this.stepsGoal,
+      waterIntakeMl: waterIntakeMl ?? this.waterIntakeMl,
+      waterIntakeGoal: waterIntakeGoal ?? this.waterIntakeGoal,
+      sleepHours: sleepHours ?? this.sleepHours,
+      sleepHoursGoal: sleepHoursGoal ?? this.sleepHoursGoal,
+      exerciseMinutes: exerciseMinutes ?? this.exerciseMinutes,
+      exerciseMinutesGoal: exerciseMinutesGoal ?? this.exerciseMinutesGoal,
+    );
+  }
+
   factory ActivitySummary.fromMap(Map<String, dynamic> map) {
     return ActivitySummary(
       steps: (map['steps'] as num? ?? 0).toInt(),

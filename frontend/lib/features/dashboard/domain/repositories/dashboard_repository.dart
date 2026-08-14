@@ -6,4 +6,5 @@ abstract class DashboardRepository {
   Future<WeatherInfo> getWeather(double lat, double lon);
   Future<DashboardData> getDashboardData(String userId, {bool forceRefresh = false});
   Future<ActivitySummary> getActivitySummary(String userId);
+  Future<void> saveActivitySummary(String userId, ActivitySummary summary);
 }

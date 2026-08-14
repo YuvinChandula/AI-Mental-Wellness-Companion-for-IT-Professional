@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import '../../../../core/services/pedometer_service.dart';
 import '../../data/datasources/dashboard_local_datasource.dart';
 import '../../data/datasources/dashboard_remote_datasource.dart';
 import '../../data/repositories/dashboard_repository_impl.dart';
@@ -82,13 +84,30 @@ final StateNotifierProvider<DashboardNotifier, AsyncValue<DashboardData>> dashbo
 class ActivityNotifier extends StateNotifier<AsyncValue<ActivitySummary>> {
   final DashboardRepository _repository;
   final Ref _ref;
+  StreamSubscription<int>? _pedometerSub;
 
   ActivityNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
     loadActivities();
+    _initPedometer();
     _ref.listen<AuthState>(authStateProvider, (AuthState? previous, AuthState next) {
       if (next is AuthSuccess || next is AuthInitial) {
         loadActivities();
       }
+    });
+  }
+
+  void _initPedometer() {
+    PedometerService.instance.initialize();
+    _pedometerSub = PedometerService.instance.dailyStepStream.listen((int liveSteps) {
+      state.whenData((ActivitySummary current) {
+        if (current.steps != liveSteps) {
+          final updated = current.copyWith(steps: liveSteps);
+          state = AsyncValue.data(updated);
+          final authState = _ref.read(authStateProvider);
+          final userId = authState is AuthSuccess ? authState.user.uid : 'anonymous';
+          _repository.saveActivitySummary(userId, updated);
+        }
+      });
     });
   }
 
@@ -109,6 +128,12 @@ class ActivityNotifier extends StateNotifier<AsyncValue<ActivitySummary>> {
         state = AsyncValue.error(e, stack);
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _pedometerSub?.cancel();
+    super.dispose();
   }
 }
 

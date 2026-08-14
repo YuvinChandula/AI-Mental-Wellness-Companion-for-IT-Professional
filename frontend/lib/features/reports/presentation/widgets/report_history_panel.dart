@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:open_file_plus/open_file_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import '../providers/analytics_providers.dart';
 import '../../domain/entities/wellness_report.dart';
 
@@ -26,7 +28,7 @@ class _ReportHistoryPanelState extends ConsumerState<ReportHistoryPanel> {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to generate report. Make sure you have mood logs.')),
+            const SnackBar(content: Text('Failed to generate report. Re-trying with defaults.')),
           );
         }
       }
@@ -39,19 +41,34 @@ class _ReportHistoryPanelState extends ConsumerState<ReportHistoryPanel> {
     setState(() => _exportingReportId = '${report.reportId}_$format');
     try {
       final List<int> bytes = await ref.read(analyticsRepositoryProvider).exportReport(
-        reportData: report.props.isNotEmpty ? _mapReportToFields(report) : {},
+        reportData: _mapReportToFields(report),
         format: format,
       );
 
-      final Directory tempDir = Directory.systemTemp;
-      final File file = File('${tempDir.path}/wellness_report_${report.reportId}.$format');
+      Directory docDir;
+      try {
+        docDir = await getApplicationDocumentsDirectory();
+      } catch (_) {
+        docDir = Directory.systemTemp;
+      }
+
+      final File file = File('${docDir.path}/wellness_report_${report.reportId}.$format');
       await file.writeAsBytes(bytes);
+
+      // Automatically open the report file after downloading
+      final OpenResult result = await OpenFile.open(file.path);
+      debugPrint('Auto-opening report file (${file.path}): ${result.type} - ${result.message}');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Report exported to: ${file.path}'),
-            action: SnackBarAction(label: 'OK', onPressed: () {}),
+            content: Text('Report downloaded & opened: wellness_report_${report.reportId}.$format'),
+            action: SnackBarAction(
+              label: 'Reopen',
+              onPressed: () {
+                OpenFile.open(file.path);
+              },
+            ),
             duration: const Duration(seconds: 5),
           ),
         );
