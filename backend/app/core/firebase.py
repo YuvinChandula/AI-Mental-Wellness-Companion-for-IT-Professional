@@ -13,13 +13,15 @@ class FirebaseService:
         if cls._initialized:
             return
 
+        project_id = os.getenv("FIREBASE_PROJECT_ID", "mindsync-ai-18fbb")
+
         # Method 1: Load from JSON environment variable (for Render/cloud deployment)
         firebase_creds_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
         if firebase_creds_json:
             try:
                 cred_dict = json.loads(firebase_creds_json)
                 cred = credentials.Certificate(cred_dict)
-                firebase_admin.initialize_app(cred)
+                firebase_admin.initialize_app(cred, {"projectId": project_id})
                 cls._initialized = True
             except Exception as e:
                 print(f"Warning: Failed to load Firebase credentials from ENV JSON: {e}")
@@ -30,19 +32,18 @@ class FirebaseService:
             if cred_path and os.path.exists(cred_path):
                 try:
                     cred = credentials.Certificate(cred_path)
-                    firebase_admin.initialize_app(cred)
+                    firebase_admin.initialize_app(cred, {"projectId": project_id})
                     cls._initialized = True
                 except Exception as e:
                     print(f"Warning: Failed to load Firebase credentials from Certificate: {e}")
 
-        # Method 3: Default credentials (for GCP environments)
+        # Method 3: Default initialization with explicit project ID
         if not cls._initialized:
             try:
-                firebase_admin.initialize_app()
+                firebase_admin.initialize_app(options={"projectId": project_id})
                 cls._initialized = True
-            except Exception:
-                # Fail silently during testing environment execution
-                pass
+            except Exception as e:
+                print(f"Warning: Default Firebase initialization failed: {e}")
         
         try:
             cls.db = firestore.client()
