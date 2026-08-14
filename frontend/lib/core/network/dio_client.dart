@@ -7,7 +7,7 @@ class DioClient {
   final Dio _dio;
 
   DioClient() : _dio = Dio() {
-    final String baseUrl = dotenv.env['BACKEND_URL'] ?? 'http://10.0.2.2:8000';
+    final String baseUrl = dotenv.env['BACKEND_URL'] ?? 'https://ai-mental-wellness-companion-for-it.onrender.com';
     _dio.options = BaseOptions(
       baseUrl: baseUrl,
       connectTimeout: const Duration(seconds: 15),

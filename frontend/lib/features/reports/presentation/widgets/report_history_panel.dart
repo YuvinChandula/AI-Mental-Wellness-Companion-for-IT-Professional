@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:open_file_plus/open_file_plus.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import '../providers/analytics_providers.dart';
 import '../../domain/entities/wellness_report.dart';
@@ -56,7 +56,7 @@ class _ReportHistoryPanelState extends ConsumerState<ReportHistoryPanel> {
       await file.writeAsBytes(bytes);
 
       // Automatically open the report file after downloading
-      final OpenResult result = await OpenFile.open(file.path);
+      final OpenResult result = await OpenFilex.open(file.path);
       debugPrint('Auto-opening report file (${file.path}): ${result.type} - ${result.message}');
 
       if (mounted) {
@@ -66,7 +66,7 @@ class _ReportHistoryPanelState extends ConsumerState<ReportHistoryPanel> {
             action: SnackBarAction(
               label: 'Reopen',
               onPressed: () {
-                OpenFile.open(file.path);
+                OpenFilex.open(file.path);
               },
             ),
             duration: const Duration(seconds: 5),
