@@ -28,8 +28,8 @@ def health_details():
     except Exception:
         pass
 
-    # 3. Verify Groq/Gemini API connectivity config
-    api_key = settings.GROQ_API_KEY or settings.GEMINI_API_KEY
+    # 3. Verify Groq API connectivity config
+    api_key = settings.GROQ_API_KEY
     ai_healthy = api_key is not None and not api_key.startswith("mock")
 
     # 4. Verify Background Scheduler status

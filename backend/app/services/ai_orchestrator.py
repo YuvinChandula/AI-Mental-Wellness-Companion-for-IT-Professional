@@ -1,14 +1,21 @@
 import os
-import httpx
+import json
 import asyncio
+import urllib.request
+import urllib.error
 from typing import Dict, Any, Optional
 from ..core.prompt_library import PromptLibrary
 from .cache_service import CacheService
-from loguru import logger
+try:
+    from loguru import logger
+except ImportError:
+    import logging
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger("AIOrchestrator")
 
 class AIOrchestrator:
     def __init__(self):
-        self.api_key = os.getenv("GROQ_API_KEY", os.getenv("GEMINI_API_KEY", ""))
+        self.api_key = os.getenv("GROQ_API_KEY", "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")
 
     async def generate_summary(self, user_id: str, metrics: Dict[str, Any], summary_type: str = "daily") -> str:
         # Check cache first
@@ -45,17 +52,18 @@ class AIOrchestrator:
         return await self._execute_groq_request_with_retry(prompt, max_retries)
 
     async def _execute_groq_request_with_retry(self, prompt: str, max_retries: int = 3) -> str:
-        if not self.api_key or self.api_key.startswith("mock") or "your_" in self.api_key.lower() or "api_key" in self.api_key.lower():
+        if not self.api_key or self.api_key.startswith("mock") or "your_" in self.api_key.lower():
             logger.warning("Mocking Groq AI content generation due to placeholder or mock key.")
             return "MindSync Developer Check-in: You are making steady progress. Keep focus high, and take short screen breaks."
 
         url = "https://api.groq.com/openai/v1/chat/completions"
         headers = {
             "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "User-Agent": "MindSyncAI/1.0"
         }
         payload = {
-            "model": "llama-3.3-70b-versatile",
+            "model": "openai/gpt-oss-120b",
             "messages": [
                 {
                     "role": "system",
@@ -70,20 +78,20 @@ class AIOrchestrator:
             "max_tokens": 1024
         }
 
-        async with httpx.AsyncClient() as client:
-            for attempt in range(max_retries):
-                try:
-                    response = await client.post(url, json=payload, headers=headers, timeout=10.0)
-                    if response.status_code == 200:
-                        data = response.json()
-                        text = data['choices'][0]['message']['content']
+        data_bytes = json.dumps(payload).encode("utf-8")
+
+        for attempt in range(max_retries):
+            try:
+                req = urllib.request.Request(url, data=data_bytes, headers=headers, method="POST")
+                with urllib.request.urlopen(req, timeout=10.0) as resp:
+                    if resp.status == 200:
+                        res_json = json.loads(resp.read().decode("utf-8"))
+                        text = res_json['choices'][0]['message']['content']
                         return text.strip()
-                    else:
-                        logger.warning(f"Groq API returned status {response.status_code}. Retrying...")
-                except Exception as e:
-                    logger.warning(f"Groq API request failed on attempt {attempt+1}: {e}")
-                
-                await asyncio.sleep(2 ** attempt)
+            except Exception as e:
+                logger.warning(f"Groq API request failed on attempt {attempt+1}: {e}")
+            
+            await asyncio.sleep(1 ** attempt)
 
         # Fallback response
         logger.error("Groq AI API requests failed after maximum retries. Returning fallback.")

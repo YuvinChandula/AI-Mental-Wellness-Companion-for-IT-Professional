@@ -1,18 +1,19 @@
 import json
-import requests
+try:
+    import requests
+except ImportError:
+    requests = None
 import os
 
 class HybridRecommendationEngine:
     def __init__(self):
-        self.groq_api_key = os.getenv("GROQ_API_KEY", os.getenv("GEMINI_API_KEY", ""))
-        self.gemini_api_key = self.groq_api_key
+        self.groq_api_key = os.getenv("GROQ_API_KEY", "")
         # If running locally, let's load from .env if present
         if not self.groq_api_key:
             try:
                 from dotenv import load_dotenv
                 load_dotenv()
-                self.groq_api_key = os.getenv("GROQ_API_KEY", os.getenv("GEMINI_API_KEY", ""))
-                self.gemini_api_key = self.groq_api_key
+                self.groq_api_key = os.getenv("GROQ_API_KEY", "")
             except ImportError:
                 pass
 
@@ -184,10 +185,11 @@ class HybridRecommendationEngine:
 
         headers = {
             "Authorization": f"Bearer {self.groq_api_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "User-Agent": "MindSyncAI/1.0"
         }
         payload = {
-            "model": "llama-3.3-70b-versatile",
+            "model": "openai/gpt-oss-120b",
             "messages": [
                 {"role": "system", "content": system_instruction},
                 {"role": "user", "content": prompt}
@@ -196,24 +198,27 @@ class HybridRecommendationEngine:
             "response_format": {"type": "json_object"}
         }
 
-        response = requests.post(url, headers=headers, json=payload, timeout=8)
-        if response.status_code == 200:
-            data = response.json()
-            text = data['choices'][0]['message']['content']
-            
-            # Clean possible markdown wrapping
-            text = text.replace("```json", "").replace("```", "").strip()
-            
-            res_json = json.loads(text)
-            if isinstance(res_json, dict) and "recommendations" in res_json:
-                return res_json["recommendations"]
-            elif isinstance(res_json, dict) and "data" in res_json:
-                return res_json["data"]
-            elif isinstance(res_json, list):
-                return res_json
-            return [res_json]
-        else:
-            raise Exception(f"Groq API returned status {response.status_code}")
+        import urllib.request
+        data_bytes = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(url, data=data_bytes, headers=headers, method="POST")
+        with urllib.request.urlopen(req, timeout=8) as response:
+            if response.status == 200:
+                data = json.loads(response.read().decode("utf-8"))
+                text = data['choices'][0]['message']['content']
+                
+                # Clean possible markdown wrapping
+                text = text.replace("```json", "").replace("```", "").strip()
+                
+                res_json = json.loads(text)
+                if isinstance(res_json, dict) and "recommendations" in res_json:
+                    return res_json["recommendations"]
+                elif isinstance(res_json, dict) and "data" in res_json:
+                    return res_json["data"]
+                elif isinstance(res_json, list):
+                    return res_json
+                return [res_json]
+            else:
+                raise Exception(f"Groq API returned status {response.status}")
 
     def _get_fallback_gemini_rec(self) -> dict:
         return {
