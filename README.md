@@ -21,14 +21,14 @@ MindSync AI/
 │   └── tests/                      # Python pytest automated testing suites
 │
 ├── frontend/                       # Flutter client mobile codebase
-│   ├── lib/
-│   │   ├── core/                   # Routing, themes, network, storage, and sync engines
-│   │   ├── features/               # Auth, mood, chat, recommendations, reports, settings
-│   │   └── shared/                 # Shared widgets & providers
-│   │
-│   └── test/                       # Dart unit and widget tests
-│
-└── docs/                           # Software architecture, APIs, and schemas guides
+    ├── lib/
+    │   ├── core/                   # Routing, themes, network, storage, and sync engines
+    │   ├── features/               # Auth, mood, chat, recommendations, reports, settings
+    │   └── shared/                 # Shared widgets & providers
+    │
+    └── test/                       # Dart unit and widget tests
+
+
 ```
 
 ---
